@@ -1,0 +1,12 @@
+POS:stack(1)	POS:stack(0)	POS:input(0)	POS:input(1)	POS:input(2)	POS:input(3)	DEP:stack(0)	DEP:stack(0).L	DEP:stack(0).R	DEP:input(0).L	LEX:stack(0)	LEX:stack(0).H	LEX:input(0)	LEX:input(1)	Next move
+NULL	NULL	det	n	v	p	NULL	NULL	NULL	NULL	NULL	NULL	the	clock	S
+NULL	det	n	v	p	det	NULL	NULL	NULL	NULL	the	NULL	clock	is	LA
+NULL	NULL	n	v	p	det	NULL	NULL	NULL	det	NULL	NULL	clock	is	S
+NULL	n	v	p	det	n	NULL	det	det	NULL	clock	NULL	is	on	S
+n	v	p	det	n	NULL	NULL	NULL	NULL	NULL	is	NULL	on	the	LA
+NULL	n	p	det	n	NULL	NULL	det	det	cop	clock	NULL	on	the	LA
+NULL	NULL	p	det	n	NULL	NULL	NULL	NULL	subj	NULL	NULL	on	the	S
+NULL	p	det	n	NULL	NULL	NULL	subj	cop	NULL	on	NULL	the	wall	S
+p	det	n	NULL	NULL	NULL	NULL	NULL	NULL	NULL	the	NULL	wall	NULL	LA
+NULL	p	n	NULL	NULL	NULL	NULL	subj	cop	det	on	NULL	wall	NULL	RA
+p	n	NULL	NULL	NULL	NULL	obj	det	det	NULL	wall	on	NULL	NULL	
