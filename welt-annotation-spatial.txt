@@ -1,11 +1,3 @@
-The clock is on the wall
-0	the 	the 		D	1	DET
-1	clock 	clock 		N	3	SUBJ
-2	is 	be	3SG.PRS	V	3	COP
-3	on 	on 		P	0	ROOT
-4	the 	the 		D	5	DET
-5	table	table		N	3	OBJ
-
 The stick is leaning against the tree
 0	the 	the 		D	1	DET
 1	stick	stick		N	3	SUBJ
