@@ -630,3 +630,4 @@ The cloth is draped against the stump
 4	against 	against 		P	3	ADJUNCT
 5	the 	the 		D	6	DET
 6	stump 	stump 		N	4	OBJ
+
