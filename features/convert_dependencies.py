@@ -30,12 +30,12 @@ def set_property(properties, pos, propName, new_value):
     relevant_props[columns[propName] - 1] = new_value
 
 class Parser:
-    def __init__(self):
+    def __init__(self, k=1):
         self.S = []
         self.I = []
         self.A = []  # the list of dependents on any given token
         self.mappings = {}
-        self.k = 1
+        self.k = k
 
 
     def get_current_state(self, properties):
@@ -277,7 +277,6 @@ class Parser:
 
 
     def predict_next_action(self, test_vectors):
-
         min_distances = []
         for j in range(0, len(training_fvs)):
             f = training_fvs[j]
@@ -375,8 +374,8 @@ def convert_instance_to_fv(state):
     return vectors
 
 
-def train(filepath, max=-1, start=1, print_status=False):
-    print("[Training]")
+def train(filepath, max=-10, start=1, print_status=False):
+    # print("[Training]")
     global FV_MAPPINGS
     FV_MAPPINGS = defaultdict(lambda: ["NULL"])
     training_features = []
@@ -428,6 +427,7 @@ def train(filepath, max=-1, start=1, print_status=False):
 
     convert_to_fvs(training_features, "../training.dat")
     infile.close()
+    # print "Completed training"
 
 
 def get_raw_accuracy(predictions, real_properties):
@@ -453,13 +453,12 @@ def get_raw_accuracy(predictions, real_properties):
             if (head, label, dep) in predictions[key]:
                 correct += 1
 
+    accuracy = correct / total
+    return accuracy
 
-    print "Accuracy: %2.2f" % (correct / total)
-
-
-def predict(filepath, max=-1, start=1, print_status=False):
-    print("[Testing]")
-    parser = Parser()
+def predict(filepath, max=-3.14, start=1, print_status=False, k=1):
+    # print("[Testing]")
+    parser = Parser(k)
     infile = open(filepath, 'r')
     line = infile.readline()
     first = True
@@ -514,13 +513,29 @@ def predict(filepath, max=-1, start=1, print_status=False):
         line = infile.readline()
 
     infile.close()
-    get_raw_accuracy(predictions, real_dependencies)
+
+    return (predictions, real_dependencies)
+
+def incremental_train(filepath):
+    for i in range(1, 75, 5):
+        k = max(i/2 - 1, 1)
+        train_start = 1
+        train_num = i
+        test_start = train_start + train_num
+        train(filepath, train_num, train_start)
+        (predictions, real_dependencies) = predict(filepath, start=test_start, k=k, )
+        accuracy = get_raw_accuracy(predictions, real_dependencies)
+        print("Training set size: %d\tk: %d\tAccuracy: %2.2f" % (train_num, k, accuracy))
 
 
-train_start = 1
-train_num = 1
-test_start = train_start + train_num
-test_num = -1
 
-train('../welt-annotation-spatial.txt', train_num, train_start)
-predict('../welt-annotation-spatial.txt', max=test_num, start=test_start, print_status=True)
+
+# train_start = 1
+# train_num = 1
+# test_start = train_start + train_num
+# test_num = -1
+#
+# train('../welt-annotation-spatial.txt', train_num, train_start)
+# predict('../welt-annotation-spatial.txt', max=test_num, start=test_start)
+
+incremental_train('../welt-annotation-spatial.txt')
