@@ -13,7 +13,7 @@ actions = {"S": 1, "LA": 2, "RA": 3, "END": 4}
 training_fvs = []
 LABEL = "dep"
 FV_MAPPINGS = defaultdict(lambda: ["NULL"])
-k = 1
+
 
 def get_property(properties, pos, propName):
     relevant_props = properties[pos]
@@ -23,15 +23,22 @@ def get_property(properties, pos, propName):
         return int(relevant_props[columns[propName] - 1])
     return relevant_props[columns[propName] - 1]
 
+def set_property(properties, pos, propName, new_value):
+    relevant_props = properties[pos]
+    # while columns[propName] - 1 <= len(relevant_props):
+    #     relevant_props.append('')
+    relevant_props[columns[propName] - 1] = new_value
+
 class Parser:
     def __init__(self):
         self.S = []
         self.I = []
         self.A = []  # the list of dependents on any given token
         self.mappings = {}
+        self.k = 1
 
 
-    def get_action_features(self, properties):
+    def get_current_state(self, properties):
         features = []
         # Feature 1: POS:stack(1), morph:stack(1)
         if len(self.S) > 1:
@@ -150,7 +157,7 @@ class Parser:
 
         return features
 
-    def extract_train_features(self, sentence, properties):
+    def extract_train_states(self, sentence, properties):
         features = []
         modified_features = []
         self.S = []
@@ -161,7 +168,7 @@ class Parser:
         i = 0
         while len(self.I) > 0:
 
-            state = self.get_action_features(properties)
+            state = self.get_current_state(properties)
             if len(self.S) == 0:
                 features.append(("S", 'NULL', state))
                 self.S.append(self.I[0])
@@ -187,7 +194,7 @@ class Parser:
                     self.S.append(self.I[0])
                     self.I = self.I[1:]
         #final state
-        state = self.get_action_features(properties)
+        state = self.get_current_state(properties)
         features.append(("END", 'NULL', state))
 
         for (state, dep, feat) in features:
@@ -200,7 +207,7 @@ class Parser:
 
         return modified_features
 
-    def extract_test_features(self, sentence, properties):
+    def predict_actions(self, sentence, properties):
         # print "extracting"
         features = []
         modified_features = []
@@ -211,29 +218,33 @@ class Parser:
         self.A = []  # the list of dependents on any given token
         i = 0
         while len(self.I) > 0:
-            state = self.get_action_features(properties)
+            state = self.get_current_state(properties)
             lex_state = [self.mappings[f] if f in self.mappings.keys() else f for f in state]
             fv = convert_instance_to_fv(lex_state)
-            (action, dep) = self.predict(fv)
+            (action, dep) = self.predict_next_action(fv)
             features.append((action, dep, state))
             if action == actions["S"]:
                 self.S.append(self.I[0])
                 self.I = self.I[1:]
+
             elif action == actions["LA"]:
                 stack_top = self.S[-1]
                 self.S.pop()
-                properties[stack_top][columns["head"]] = self.I[0]
-                properties[stack_top][columns["head"]] = FV_MAPPINGS[LABEL][dep]
+                set_property(properties, stack_top, "head", self.I[0])
+                set_property(properties, stack_top, "dep", FV_MAPPINGS[LABEL][dep])
+
                 self.A.append((self.I[0], dep, stack_top))
+
             elif action == actions["RA"]:
                 stack_top = self.S[-1]
-                properties[self.I[0]][columns["head"]] = stack_top
-                properties[self.I[0]][columns["head"]] = FV_MAPPINGS[LABEL][dep]
+                set_property(properties, self.I[0], "head", stack_top)
+                set_property(properties, self.I[0], "dep", FV_MAPPINGS[LABEL][dep])
+
                 self.A.append((stack_top, dep, self.I[0]))
                 self.S.append(self.I[0])
                 self.I = self.I[1:]
 
-        state = self.get_action_features(properties)
+        state = self.get_current_state(properties)
         features.append(("END", 'NULL', state))
 
         for (action, dep, state) in features:
@@ -242,13 +253,30 @@ class Parser:
             # print "%s\t%s\t%s" % (state, dep, "\t".join(feat))
             # print len(feat)
             modified_features.append((action, dep, state))
-        modified_A = [(self.mappings[h], FV_MAPPINGS[LABEL][l], self.mappings[d]) for (h, l, d) in self.A]
+
+        # modified_A = [(self.mappings[h], FV_MAPPINGS[LABEL][l], self.mappings[d]) for (h, l, d) in self.A]
         self.A = [(h, FV_MAPPINGS[LABEL][l], d) for (h, l, d) in self.A]
-        # print "Dependencies: %s\n" % modified_A
+        self.predict_root(sentence)
 
         return self.A
 
-    def predict(self, test_vectors):
+    def predict_root(self, sentence):
+        positions = [i for i in range(0, len(sentence))]
+        root = -1
+        for i in positions:
+            is_dep = False
+            for (head, label, dep) in self.A:
+                if i == dep:
+                    is_dep = True
+                    break
+            if not is_dep:
+                root = i
+                break
+
+        self.A.append((0, 'root', root))
+
+
+    def predict_next_action(self, test_vectors):
 
         min_distances = []
         for j in range(0, len(training_fvs)):
@@ -265,7 +293,7 @@ class Parser:
                 dist = math.sqrt(dist)
                 train_dist += dist
             heappush(min_distances, (train_dist, j))
-        smallest = nsmallest(k, min_distances)
+        smallest = nsmallest(self.k, min_distances)
         # print smallest
         next_action = defaultdict(int)
 
@@ -276,10 +304,15 @@ class Parser:
             dep_num = fv[1]
             next_action[action_num] += 1
             next_dep[dep_num] += 1
-        # print next_action
-        # print next_dep
+
         chosen_action = max(next_action.iteritems(), key=operator.itemgetter(1))[0]
         chosen_dep = max(next_dep.iteritems(), key=operator.itemgetter(1))[0]
+
+        if chosen_action == actions["LA"] and len(self.S)==0:
+            chosen_action = actions["S"]
+        if chosen_action == actions["RA"] and len(self.S)==0:
+            chosen_action = actions["S"]
+
         if chosen_action == actions["S"] and chosen_dep != 0:
             chosen_dep = 0
         elif chosen_action != actions["S"] and chosen_dep == 0:
@@ -342,7 +375,8 @@ def convert_instance_to_fv(state):
     return vectors
 
 
-def train(filepath, max=-1, start=1):
+def train(filepath, max=-1, start=1, print_status=False):
+    print("[Training]")
     global FV_MAPPINGS
     FV_MAPPINGS = defaultdict(lambda: ["NULL"])
     training_features = []
@@ -350,6 +384,7 @@ def train(filepath, max=-1, start=1):
     infile = open(filepath, 'r')
     line = infile.readline()
     first = True
+    training = False
     properties = {}
     sentence = None
     num = 0
@@ -363,13 +398,17 @@ def train(filepath, max=-1, start=1):
             parser.reset()
             num += 1
             if num >= start:
-                sent_features = parser.extract_train_features(sentence, properties)
+                sent_features = parser.extract_train_states(sentence, properties)
                 add_fv_mappings(sent_features)
                 training_features.append(sent_features)
+                training = True
+                if training and print_status:
+                    print "%d:\t%s" % (num, sentence)
 
 
             if num == max + start - 1:
                 break
+
             properties = {}
             first = True
 
@@ -378,10 +417,10 @@ def train(filepath, max=-1, start=1):
             line = line.split()
             line = [w.strip() for w in line]
             sentence = line
-            print "%d:\t%s" % (num, sentence)
             first = False
         else:
             line = line.split('\t')
+            line = [w.strip() for w in line]
             pos = int(line[columns["index"]])
             properties[pos] = line[columns["index"] + 1:]
 
@@ -393,7 +432,6 @@ def train(filepath, max=-1, start=1):
 
 def get_raw_accuracy(predictions, real_properties):
     test_dependencies = {}
-    print real_properties
     for key in predictions.keys():
         dependencies = real_properties[key]
         all_deps = []
@@ -403,22 +441,29 @@ def get_raw_accuracy(predictions, real_properties):
             all_deps.append((head, label, index))
         test_dependencies[key] = all_deps
 
-    print test_dependencies
-    print predictions
-    # num = 0
-    # total = 0.0
-    # correct = 0.0
+    # print test_dependencies
+    # print predictions
+    num = 0
+    total = 0.0
+    correct = 0.0
+
+    for key in test_dependencies.keys():
+        for (head, label, dep) in test_dependencies[key]:
+            total += 1
+            if (head, label, dep) in predictions[key]:
+                correct += 1
 
 
+    print "Accuracy: %2.2f" % (correct / total)
 
-    # print "Accuracy: %2.2f" % (correct / total)
 
-
-def predict(filepath, max=-1, start=1):
+def predict(filepath, max=-1, start=1, print_status=False):
+    print("[Testing]")
     parser = Parser()
     infile = open(filepath, 'r')
     line = infile.readline()
     first = True
+    testing = False
     properties = defaultdict(list)
     test_properties = defaultdict(list)
     tested_sentences = []
@@ -436,9 +481,12 @@ def predict(filepath, max=-1, start=1):
             num += 1
             if num >= start:
                 tested_sentences.append(" ".join(sentence))
-                sent_pred = parser.extract_test_features(sentence, properties)
+                sent_pred = parser.predict_actions(sentence, properties)
                 predictions[num - 1] = sent_pred
                 real_dependencies[num - 1] = test_properties
+                testing = True
+                if testing and print_status:
+                    print "%d:\t%s" % (num, sentence)
 
 
             if num == max + start - 1:
@@ -452,10 +500,10 @@ def predict(filepath, max=-1, start=1):
             line = line.split()
             line = [w.strip() for w in line]
             sentence = line
-            print "%d:\t%s" % (num, sentence)
             first = False
         else:
             line = line.split('\t')
+            line = [w.strip() for w in line]
             pos = int(line[columns["index"]])
             properties[pos] = line[columns["index"] + 1:]
             properties[pos][-1] = 'NULL'
@@ -470,9 +518,9 @@ def predict(filepath, max=-1, start=1):
 
 
 train_start = 1
-train_num = 4
+train_num = 1
 test_start = train_start + train_num
-test_num = 1
+test_num = -1
 
 train('../welt-annotation-spatial.txt', train_num, train_start)
-predict('../welt-annotation-spatial.txt', max=test_num, start=test_start)
+predict('../welt-annotation-spatial.txt', max=test_num, start=test_start, print_status=True)
