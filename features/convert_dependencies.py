@@ -1,18 +1,26 @@
 # Written by: Anusha Balakrishnan
 # Date: 10/6/14
 from collections import defaultdict
+import os
+import time
 from heapq import heappush, nsmallest
 import math
 import operator
+import pickle
 # Use Weka - try different classification algs for the dependency labels, for parser action
 # start using differeent method when you have more training data?
 #
+# todo: Add methods for LA, RA, S instead of just hardcoding in what they do
+#todo: add object serialization - when a model is written, the set of features is serialized and saved, and a file that
+# maintains the mapping between .dat file and serialized object is maintained
+# todo: WRITE OUT THE FV MAPPINGS - this is needed to actually do classification
+# todo: clean up generally
+import datetime
 
 columns = {"index": 0, "word": 1, "stem": 2, "morph": 3, "pos": 4, "head": 5, "dep": 6}
 actions = {"S": 1, "LA": 2, "RA": 3, "END": 4}
 training_fvs = []
 LABEL = "dep"
-FV_MAPPINGS = defaultdict(lambda: ["NULL"])
 
 
 def get_property(properties, pos, propName):
@@ -29,6 +37,174 @@ def set_property(properties, pos, propName, new_value):
     #     relevant_props.append('')
     relevant_props[columns[propName] - 1] = new_value
 
+class FeatureExtractor:
+    def __init__(self):
+        self.FV_MAPPINGS = defaultdict(list)
+        self.LABEL = "dep"
+        self.FV_MAPPINGS[self.LABEL] = ["NULL"]
+
+    def add_fv_mappings(self, states):
+        for f in states:
+            state = f[2]
+            dep = f[1]
+
+            if dep not in self.FV_MAPPINGS[self.LABEL]:
+                self.FV_MAPPINGS[self.LABEL].append(dep)
+            for i in range(0, len(state)):
+                if i not in self.FV_MAPPINGS.keys():
+                    self.FV_MAPPINGS[i] = ["NULL"]
+                if state[i] not in self.FV_MAPPINGS[i]:
+                    self.FV_MAPPINGS[i].append(state[i])
+
+    def convert_instance_to_fv(self, state):
+        vectors = defaultdict(str)
+        for i in range(0, len(state)):
+            v = ["0"] * len(self.FV_MAPPINGS[i])
+            if state[i] in self.FV_MAPPINGS[i]:
+                v[self.FV_MAPPINGS[i].index(state[i])] = "1"
+            v = "".join(v)
+            vectors[i] = v
+        return vectors
+
+    def convert_to_fvs(self, all_features):
+        training_fvs = []
+        for sent_features in all_features:
+            for (action_name, dep, state) in sent_features:
+                action_num = actions[action_name]
+                dep_num = self.FV_MAPPINGS[self.LABEL].index(dep)
+                vectors = self.convert_instance_to_fv(state)
+                line = [("%d:%s" % (f, v)) for (f, v) in vectors.iteritems()]
+                line = "\t".join(line)
+                training_fvs.append((action_num, dep_num, line))
+
+        return training_fvs
+
+    def write_fv_mappings(self, filepath):
+        mapping_file = open(filepath, 'wb')
+        print self.FV_MAPPINGS
+        pickle.dump(self.FV_MAPPINGS, mapping_file)
+        mapping_file.close()
+
+    def load_fv_mappings(self, filepath):
+        mapping_file = open(filepath, 'rb')
+        self.FV_MAPPINGS = pickle.load(mapping_file)
+        mapping_file.close()
+
+class ParseClassifier:
+    def __init__(self, k=1):
+        self.mapping_path = "../models/mapping.dat"
+        self.fv_mapping_path = "../models/fv_mapping%s.dat"
+        self.model_path = "../models/model%s."
+        self.extractor = FeatureExtractor()
+        self.training_data = []
+        self.model = None
+        self.k = k
+
+    def add_training_data(self, states):
+        self.extractor.add_fv_mappings(states)
+        self.training_data.append(states)
+
+    def write_training_data(self, filepath, fvs):
+        train_file = open(filepath, 'w')
+        for (action, dep, vectors) in fvs:
+            line = "%s\t%s\t%s\n" % (str(action), str(dep), vectors)
+            train_file.write(line)
+        train_file.close()
+        ts = time.time()
+        st = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S')
+
+        model_file = open(self.model_path % st, 'wb')
+        pickle.dump(fvs, model_file)
+        model_file.close()
+
+        self.extractor.write_fv_mappings(self.fv_mapping_path % st)
+
+        if os.path.isfile(self.mapping_path):
+            mapping_file = open(self.mapping_path, 'rb')
+            file_map = pickle.load(mapping_file)
+            mapping_file.close()
+            file_map[train_file] = (self.model_path % st, self.fv_mapping_path % st)
+            mapping_file = open(self.mapping_path, 'wb')
+            pickle.dump(file_map, mapping_file)
+            mapping_file.close()
+        else:
+            file_map = {filepath: (self.model_path % st, self.fv_mapping_path % st)}
+            print file_map
+            mapping_file = open(self.mapping_path, 'wb')
+            pickle.dump(file_map,mapping_file)
+            mapping_file.close()
+
+        # return (self.model_path % st, self.fv_mapping_path % st)
+
+    def train(self, filepath='../training.dat'):
+        training_fvs = self.extractor.convert_to_fvs(self.training_data)
+        self.model = training_fvs
+        self.write_training_data(filepath, training_fvs)
+
+    def load_model(self, filepath):
+        if not os.path.isfile(self.mapping_path):
+            print "Error: could not find mapping file for previously saved model and feature vectors"
+        else:
+            mapping_file = open(self.mapping_path, 'rb')
+            file_map = pickle.load(mapping_file)
+            mapping_file.close()
+            if filepath not in file_map.keys():
+                print "[Error: Could not find model associated with training data at %s]" % filepath
+                return
+            (model_file, fv_file) = file_map[filepath]
+            mfile = open(model_file, 'rb')
+            self.model = pickle.load(mfile)
+            mfile.close()
+
+            self.extractor.load_fv_mappings(fv_file)
+
+
+    def get_next_action(self, state):
+        min_distances = []
+        fv_state = self.extractor.convert_instance_to_fv(state)
+        for j in range(0, len(self.model)):
+            f = self.model[j]
+            train_vectors = f[2]
+            train_dist = 0.0
+            for i in range(0, len(train_vectors)):
+                train_v = train_vectors[i]
+                test_v = fv_state[i]
+                dist = 0.0
+                for c in range(0, len(train_v)):
+                    diff = math.fabs(int(train_v[c]) - int(test_v[c])) ** 2
+                    dist += diff
+                dist = math.sqrt(dist)
+                train_dist += dist
+            heappush(min_distances, (train_dist, j))
+        smallest = nsmallest(self.k, min_distances)
+        # print smallest
+        next_action = defaultdict(int)
+
+        next_dep = defaultdict(int)
+        for (dist, pos) in smallest:
+            fv = training_fvs[pos]
+            action_num = fv[0]
+            dep_num = fv[1]
+            next_action[action_num] += 1
+            next_dep[dep_num] += 1
+
+        chosen_action = max(next_action.iteritems(), key=operator.itemgetter(1))[0]
+        chosen_dep = max(next_dep.iteritems(), key=operator.itemgetter(1))[0]
+
+        if chosen_action == actions["LA"] and len(self.S)==0:
+            chosen_action = actions["S"]
+        if chosen_action == actions["RA"] and len(self.S)==0:
+            chosen_action = actions["S"]
+
+        if chosen_action == actions["S"] and chosen_dep != 0:
+            chosen_dep = 0
+        elif chosen_action != actions["S"] and chosen_dep == 0:
+            chosen_dep = \
+                max([(key, value) for (key, value) in next_dep.iteritems() if value != 0], key=operator.itemgetter(1))[0]
+
+
+        # print "%d\t%d" %(chosen_action,chosen_dep)
+        return (chosen_action, chosen_dep)
 class Parser:
     def __init__(self, k=1):
         self.S = []
@@ -157,7 +333,7 @@ class Parser:
 
         return features
 
-    def extract_train_states(self, sentence, properties):
+    def get_state_sequence(self, sentence, properties):
         features = []
         modified_features = []
         self.S = []
@@ -221,7 +397,7 @@ class Parser:
             state = self.get_current_state(properties)
             lex_state = [self.mappings[f] if f in self.mappings.keys() else f for f in state]
             fv = convert_instance_to_fv(lex_state)
-            (action, dep) = self.predict_next_action(fv)
+            (action, dep) = self.predict_next_action(fv) #todo: return actual dep value instead of vector
             features.append((action, dep, state))
             if action == actions["S"]:
                 self.S.append(self.I[0])
@@ -274,7 +450,6 @@ class Parser:
                 break
 
         self.A.append((0, 'root', root))
-
 
     def predict_next_action(self, test_vectors):
         min_distances = []
@@ -330,9 +505,9 @@ class Parser:
         self.mappings = {}
 
 
-def add_fv_mappings(features):
+def add_fv_mappings(states):
     global FV_MAPPINGS
-    for f in features:
+    for f in states:
         state = f[2]
         dep = f[1]
         if dep not in FV_MAPPINGS[LABEL]:
@@ -347,11 +522,8 @@ def convert_to_fvs(all_features, fv_file):
     training_fvs = []
     train_file = open(fv_file, 'w')
     for sent_features in all_features:
-        for f in sent_features:
-            action_name = f[0]
+        for (action_name, dep, state) in sent_features:
             action_num = actions[action_name]
-            dep = f[1]
-            state = f[2]
             dep_num = FV_MAPPINGS[LABEL].index(dep)
             vectors = convert_instance_to_fv(state)
             line = [("%d:%s" % (f, v)) for (f, v) in vectors.iteritems()]
@@ -367,8 +539,6 @@ def convert_instance_to_fv(state):
         v = ["0"] * len(FV_MAPPINGS[i])
         if state[i] in FV_MAPPINGS[i]:
             v[FV_MAPPINGS[i].index(state[i])] = "1"
-        # else:
-        #     print "oops!"
         v = "".join(v)
         vectors[i] = v
     return vectors
@@ -397,7 +567,7 @@ def train(filepath, max=-10, start=1, print_status=False):
             parser.reset()
             num += 1
             if num >= start:
-                sent_features = parser.extract_train_states(sentence, properties)
+                sent_features = parser.get_state_sequence(sentence, properties)
                 add_fv_mappings(sent_features)
                 training_features.append(sent_features)
                 training = True
@@ -525,17 +695,74 @@ def incremental_train(filepath):
         train(filepath, train_num, train_start)
         (predictions, real_dependencies) = predict(filepath, start=test_start, k=k, )
         accuracy = get_raw_accuracy(predictions, real_dependencies)
-        print("Training set size: %d\tk: %d\tAccuracy: %2.2f" % (train_num, k, accuracy))
+        print("Training set size: %d\tk: %d\tAccuracy: %2.3f" % (train_num, k, accuracy))
 
 
+def single_experiment(filepath):
+    train_start = 1
+    train_num = 1
+    test_start = train_start + train_num
+    test_num = -1
+    #
+    train('../welt-annotation-spatial.txt', train_num, train_start)
+    (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', max=test_num, start=test_start)
+    accuracy = get_raw_accuracy(predictions, real_dependencies)
+    print accuracy
+
+def new_design(filepath):
+    start = 1
+    max = 10
+    classifier = ParseClassifier()
+    parser = Parser()
+    infile = open(filepath, 'r')
+    line = infile.readline()
+    first = True
+    training = False
+    properties = {}
+    sentence = None
+    num = 0
+
+    while line:
+        line = line.strip()
+        line = line.lower()
+        if line == "":
+
+            # get features here
+            parser.reset()
+            num += 1
+            if num >= start:
+                sent_features = parser.get_state_sequence(sentence, properties)
+                classifier.add_training_data(sent_features)
+                training = True
+                if training:
+                    print "%d:\t%s" % (num, sentence)
 
 
-# train_start = 1
-# train_num = 1
-# test_start = train_start + train_num
-# test_num = -1
-#
-# train('../welt-annotation-spatial.txt', train_num, train_start)
-# predict('../welt-annotation-spatial.txt', max=test_num, start=test_start)
+            if num == max + start - 1:
+                break
 
-incremental_train('../welt-annotation-spatial.txt')
+            properties = {}
+            first = True
+
+
+        elif first:
+            line = line.split()
+            line = [w.strip() for w in line]
+            sentence = line
+            first = False
+        else:
+            line = line.split('\t')
+            line = [w.strip() for w in line]
+            pos = int(line[columns["index"]])
+            properties[pos] = line[columns["index"] + 1:]
+
+        line = infile.readline()
+
+    classifier.train()
+    infile.close()
+    # print "Completed training"
+
+# new_design('../welt-annotation-spatial.txt')
+classifier = ParseClassifier()
+classifier.load_model("../training.dat")
+
