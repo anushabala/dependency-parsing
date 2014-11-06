@@ -11,11 +11,9 @@ import pickle
 # start using differeent method when you have more training data?
 #
 # todo: Add methods for LA, RA, S instead of just hardcoding in what they do
-#todo: add object serialization - when a model is written, the set of features is serialized and saved, and a file that
-# maintains the mapping between .dat file and serialized object is maintained
-# todo: WRITE OUT THE FV MAPPINGS - this is needed to actually do classification
+# todo: handle cases where LA or RA is predicted but can't occur - count as misclassification?
 # todo: clean up generally
-#todo: handle cases where LA or RA is predicted but can't occur - count as misclassification?
+
 import datetime
 
 columns = {"index": 0, "word": 1, "stem": 2, "morph": 3, "pos": 4, "head": 5, "dep": 6}
