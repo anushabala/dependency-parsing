@@ -15,12 +15,12 @@ import pickle
 # maintains the mapping between .dat file and serialized object is maintained
 # todo: WRITE OUT THE FV MAPPINGS - this is needed to actually do classification
 # todo: clean up generally
+#todo: handle cases where LA or RA is predicted but can't occur - count as misclassification?
 import datetime
 
 columns = {"index": 0, "word": 1, "stem": 2, "morph": 3, "pos": 4, "head": 5, "dep": 6}
 actions = {"S": 1, "LA": 2, "RA": 3, "END": 4}
 training_fvs = []
-LABEL = "dep"
 
 
 def get_property(properties, pos, propName):
@@ -73,15 +73,12 @@ class FeatureExtractor:
                 action_num = actions[action_name]
                 dep_num = self.FV_MAPPINGS[self.LABEL].index(dep)
                 vectors = self.convert_instance_to_fv(state)
-                line = [("%d:%s" % (f, v)) for (f, v) in vectors.iteritems()]
-                line = "\t".join(line)
-                training_fvs.append((action_num, dep_num, line))
+                training_fvs.append((action_num, dep_num, vectors))
 
         return training_fvs
 
     def write_fv_mappings(self, filepath):
         mapping_file = open(filepath, 'wb')
-        print self.FV_MAPPINGS
         pickle.dump(self.FV_MAPPINGS, mapping_file)
         mapping_file.close()
 
@@ -107,7 +104,9 @@ class ParseClassifier:
     def write_training_data(self, filepath, fvs):
         train_file = open(filepath, 'w')
         for (action, dep, vectors) in fvs:
-            line = "%s\t%s\t%s\n" % (str(action), str(dep), vectors)
+            vecs = [("%d:%s" % (f, v)) for (f, v) in vectors.iteritems()]
+            vecs = "\t".join(vecs)
+            line = "%s\t%s\t%s\n" % (str(action), str(dep), vecs)
             train_file.write(line)
         train_file.close()
         ts = time.time()
@@ -123,18 +122,17 @@ class ParseClassifier:
             mapping_file = open(self.mapping_path, 'rb')
             file_map = pickle.load(mapping_file)
             mapping_file.close()
-            file_map[train_file] = (self.model_path % st, self.fv_mapping_path % st)
+            file_map[filepath] = (self.model_path % st, self.fv_mapping_path % st)
+
             mapping_file = open(self.mapping_path, 'wb')
             pickle.dump(file_map, mapping_file)
             mapping_file.close()
         else:
             file_map = {filepath: (self.model_path % st, self.fv_mapping_path % st)}
-            print file_map
             mapping_file = open(self.mapping_path, 'wb')
             pickle.dump(file_map,mapping_file)
             mapping_file.close()
 
-        # return (self.model_path % st, self.fv_mapping_path % st)
 
     def train(self, filepath='../training.dat'):
         training_fvs = self.extractor.convert_to_fvs(self.training_data)
@@ -177,7 +175,6 @@ class ParseClassifier:
                 train_dist += dist
             heappush(min_distances, (train_dist, j))
         smallest = nsmallest(self.k, min_distances)
-        # print smallest
         next_action = defaultdict(int)
 
         next_dep = defaultdict(int)
@@ -191,10 +188,7 @@ class ParseClassifier:
         chosen_action = max(next_action.iteritems(), key=operator.itemgetter(1))[0]
         chosen_dep = max(next_dep.iteritems(), key=operator.itemgetter(1))[0]
 
-        if chosen_action == actions["LA"] and len(self.S)==0:
-            chosen_action = actions["S"]
-        if chosen_action == actions["RA"] and len(self.S)==0:
-            chosen_action = actions["S"]
+
 
         if chosen_action == actions["S"] and chosen_dep != 0:
             chosen_dep = 0
@@ -203,8 +197,8 @@ class ParseClassifier:
                 max([(key, value) for (key, value) in next_dep.iteritems() if value != 0], key=operator.itemgetter(1))[0]
 
 
-        # print "%d\t%d" %(chosen_action,chosen_dep)
-        return (chosen_action, chosen_dep)
+        return (chosen_action, self.extractor.FV_MAPPINGS[self.LABEL][chosen_dep])
+
 class Parser:
     def __init__(self, k=1):
         self.S = []
@@ -383,7 +377,7 @@ class Parser:
 
         return modified_features
 
-    def predict_actions(self, sentence, properties):
+    def predict_actions(self, sentence, properties, classifier):
         # print "extracting"
         features = []
         modified_features = []
@@ -396,8 +390,7 @@ class Parser:
         while len(self.I) > 0:
             state = self.get_current_state(properties)
             lex_state = [self.mappings[f] if f in self.mappings.keys() else f for f in state]
-            fv = convert_instance_to_fv(lex_state)
-            (action, dep) = self.predict_next_action(fv) #todo: return actual dep value instead of vector
+            (action, dep) = classifier.get_next_action(lex_state)
             features.append((action, dep, state))
             if action == actions["S"]:
                 self.S.append(self.I[0])
@@ -407,14 +400,14 @@ class Parser:
                 stack_top = self.S[-1]
                 self.S.pop()
                 set_property(properties, stack_top, "head", self.I[0])
-                set_property(properties, stack_top, "dep", FV_MAPPINGS[LABEL][dep])
+                set_property(properties, stack_top, "dep", dep)
 
                 self.A.append((self.I[0], dep, stack_top))
 
             elif action == actions["RA"]:
                 stack_top = self.S[-1]
                 set_property(properties, self.I[0], "head", stack_top)
-                set_property(properties, self.I[0], "dep", FV_MAPPINGS[LABEL][dep])
+                set_property(properties, self.I[0], "dep", dep)
 
                 self.A.append((stack_top, dep, self.I[0]))
                 self.S.append(self.I[0])
@@ -431,7 +424,6 @@ class Parser:
             modified_features.append((action, dep, state))
 
         # modified_A = [(self.mappings[h], FV_MAPPINGS[LABEL][l], self.mappings[d]) for (h, l, d) in self.A]
-        self.A = [(h, FV_MAPPINGS[LABEL][l], d) for (h, l, d) in self.A]
         self.predict_root(sentence)
 
         return self.A
@@ -510,8 +502,8 @@ def add_fv_mappings(states):
     for f in states:
         state = f[2]
         dep = f[1]
-        if dep not in FV_MAPPINGS[LABEL]:
-            FV_MAPPINGS[LABEL].append(dep)
+        if dep not in FV_MAPPINGS[""]:
+            FV_MAPPINGS[""].append(dep)
         for i in range(0, len(state)):
             if state[i] not in FV_MAPPINGS[i]:
                 FV_MAPPINGS[i].append(state[i])
@@ -524,7 +516,7 @@ def convert_to_fvs(all_features, fv_file):
     for sent_features in all_features:
         for (action_name, dep, state) in sent_features:
             action_num = actions[action_name]
-            dep_num = FV_MAPPINGS[LABEL].index(dep)
+            dep_num = FV_MAPPINGS[""].index(dep)
             vectors = convert_instance_to_fv(state)
             line = [("%d:%s" % (f, v)) for (f, v) in vectors.iteritems()]
             line = "\t".join(line)
@@ -629,10 +621,11 @@ def get_raw_accuracy(predictions, real_properties):
 def predict(filepath, max=-3.14, start=1, print_status=False, k=1):
     # print("[Testing]")
     parser = Parser(k)
+    classifier = ParseClassifier()
+    classifier.load_model("../training.dat")
     infile = open(filepath, 'r')
     line = infile.readline()
     first = True
-    testing = False
     properties = defaultdict(list)
     test_properties = defaultdict(list)
     tested_sentences = []
@@ -650,11 +643,10 @@ def predict(filepath, max=-3.14, start=1, print_status=False, k=1):
             num += 1
             if num >= start:
                 tested_sentences.append(" ".join(sentence))
-                sent_pred = parser.predict_actions(sentence, properties)
+                sent_pred = parser.predict_actions(sentence, properties, classifier)
                 predictions[num - 1] = sent_pred
                 real_dependencies[num - 1] = test_properties
-                testing = True
-                if testing and print_status:
+                if print_status:
                     print "%d:\t%s" % (num, sentence)
 
 
@@ -699,13 +691,12 @@ def incremental_train(filepath):
 
 
 def single_experiment(filepath):
-    train_start = 1
-    train_num = 1
-    test_start = train_start + train_num
-    test_num = -1
+    test_start = 11
+    test_num = 1
     #
-    train('../welt-annotation-spatial.txt', train_num, train_start)
+    # train('../welt-annotation-spatial.txt', train_num, train_start)
     (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', max=test_num, start=test_start)
+    print predictions
     accuracy = get_raw_accuracy(predictions, real_dependencies)
     print accuracy
 
@@ -762,7 +753,7 @@ def new_design(filepath):
     infile.close()
     # print "Completed training"
 
-# new_design('../welt-annotation-spatial.txt')
-classifier = ParseClassifier()
-classifier.load_model("../training.dat")
+new_design('../welt-annotation-spatial.txt')
+# predict('../welt-annotation-spatial.txt', start=11, max=1 print_status=True, k=4)
 
+# single_experiment('../welt-annotation-spatial.txt')
