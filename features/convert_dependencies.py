@@ -179,7 +179,7 @@ class ParseClassifier:
 
         next_dep = defaultdict(int)
         for (dist, pos) in smallest:
-            fv = training_fvs[pos]
+            fv = self.model[pos]
             action_num = fv[0]
             dep_num = fv[1]
             next_action[action_num] += 1
@@ -197,7 +197,7 @@ class ParseClassifier:
                 max([(key, value) for (key, value) in next_dep.iteritems() if value != 0], key=operator.itemgetter(1))[0]
 
 
-        return (chosen_action, self.extractor.FV_MAPPINGS[self.LABEL][chosen_dep])
+        return (chosen_action, self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
 
 class Parser:
     def __init__(self, k=1):
@@ -424,11 +424,11 @@ class Parser:
             modified_features.append((action, dep, state))
 
         # modified_A = [(self.mappings[h], FV_MAPPINGS[LABEL][l], self.mappings[d]) for (h, l, d) in self.A]
-        self.predict_root(sentence)
+        self.find_root(sentence)
 
         return self.A
 
-    def predict_root(self, sentence):
+    def find_root(self, sentence):
         positions = [i for i in range(0, len(sentence))]
         root = -1
         for i in positions:
@@ -443,51 +443,6 @@ class Parser:
 
         self.A.append((0, 'root', root))
 
-    def predict_next_action(self, test_vectors):
-        min_distances = []
-        for j in range(0, len(training_fvs)):
-            f = training_fvs[j]
-            train_vectors = f[2]
-            train_dist = 0.0
-            for i in range(0, len(train_vectors)):
-                train_v = train_vectors[i]
-                test_v = test_vectors[i]
-                dist = 0.0
-                for c in range(0, len(train_v)):
-                    diff = math.fabs(int(train_v[c]) - int(test_v[c])) ** 2
-                    dist += diff
-                dist = math.sqrt(dist)
-                train_dist += dist
-            heappush(min_distances, (train_dist, j))
-        smallest = nsmallest(self.k, min_distances)
-        # print smallest
-        next_action = defaultdict(int)
-
-        next_dep = defaultdict(int)
-        for (dist, pos) in smallest:
-            fv = training_fvs[pos]
-            action_num = fv[0]
-            dep_num = fv[1]
-            next_action[action_num] += 1
-            next_dep[dep_num] += 1
-
-        chosen_action = max(next_action.iteritems(), key=operator.itemgetter(1))[0]
-        chosen_dep = max(next_dep.iteritems(), key=operator.itemgetter(1))[0]
-
-        if chosen_action == actions["LA"] and len(self.S)==0:
-            chosen_action = actions["S"]
-        if chosen_action == actions["RA"] and len(self.S)==0:
-            chosen_action = actions["S"]
-
-        if chosen_action == actions["S"] and chosen_dep != 0:
-            chosen_dep = 0
-        elif chosen_action != actions["S"] and chosen_dep == 0:
-            chosen_dep = \
-                max([(key, value) for (key, value) in next_dep.iteritems() if value != 0], key=operator.itemgetter(1))[0]
-
-
-        # print "%d\t%d" %(chosen_action,chosen_dep)
-        return (chosen_action, chosen_dep)
 
 
     def reset(self):
@@ -497,44 +452,6 @@ class Parser:
         self.mappings = {}
 
 
-def add_fv_mappings(states):
-    global FV_MAPPINGS
-    for f in states:
-        state = f[2]
-        dep = f[1]
-        if dep not in FV_MAPPINGS[""]:
-            FV_MAPPINGS[""].append(dep)
-        for i in range(0, len(state)):
-            if state[i] not in FV_MAPPINGS[i]:
-                FV_MAPPINGS[i].append(state[i])
-
-
-def convert_to_fvs(all_features, fv_file):
-    global training_fvs
-    training_fvs = []
-    train_file = open(fv_file, 'w')
-    for sent_features in all_features:
-        for (action_name, dep, state) in sent_features:
-            action_num = actions[action_name]
-            dep_num = FV_MAPPINGS[""].index(dep)
-            vectors = convert_instance_to_fv(state)
-            line = [("%d:%s" % (f, v)) for (f, v) in vectors.iteritems()]
-            line = "\t".join(line)
-            train_file.write("%s\t%s\t%s\n" % (str(action_num), str(dep_num), line))
-            training_fvs.append((action_num, dep_num, vectors))
-    train_file.close()
-
-
-def convert_instance_to_fv(state):
-    vectors = defaultdict(str)
-    for i in range(0, len(state)):
-        v = ["0"] * len(FV_MAPPINGS[i])
-        if state[i] in FV_MAPPINGS[i]:
-            v[FV_MAPPINGS[i].index(state[i])] = "1"
-        v = "".join(v)
-        vectors[i] = v
-    return vectors
-
 
 def train(filepath, max=-10, start=1, print_status=False):
     # print("[Training]")
@@ -542,6 +459,7 @@ def train(filepath, max=-10, start=1, print_status=False):
     FV_MAPPINGS = defaultdict(lambda: ["NULL"])
     training_features = []
     parser = Parser()
+    classifier = ParseClassifier()
     infile = open(filepath, 'r')
     line = infile.readline()
     first = True
@@ -560,8 +478,7 @@ def train(filepath, max=-10, start=1, print_status=False):
             num += 1
             if num >= start:
                 sent_features = parser.get_state_sequence(sentence, properties)
-                add_fv_mappings(sent_features)
-                training_features.append(sent_features)
+                classifier.add_training_data(sent_features)
                 training = True
                 if training and print_status:
                     print "%d:\t%s" % (num, sentence)
@@ -587,24 +504,16 @@ def train(filepath, max=-10, start=1, print_status=False):
 
         line = infile.readline()
 
-    convert_to_fvs(training_features, "../training.dat")
+    classifier.train('../training.dat')
     infile.close()
     # print "Completed training"
 
 
-def get_raw_accuracy(predictions, real_properties):
-    test_dependencies = {}
-    for key in predictions.keys():
-        dependencies = real_properties[key]
-        all_deps = []
-        for index in dependencies:
-            head = get_property(dependencies, index, "head")
-            label = get_property(dependencies, index, "dep")
-            all_deps.append((head, label, index))
-        test_dependencies[key] = all_deps
+def get_raw_accuracy(predictions, test_dependencies):
 
-    # print test_dependencies
-    # print predictions
+
+    print "Real dependencies:\t\t", test_dependencies
+    print "Predicted dependencies:\t", predictions
     num = 0
     total = 0.0
     correct = 0.0
@@ -617,6 +526,18 @@ def get_raw_accuracy(predictions, real_properties):
 
     accuracy = correct / total
     return accuracy
+
+def get_dependencies_from_properties(real_properties):
+    test_dependencies = {}
+    for key in real_properties.keys():
+        dependencies = real_properties[key]
+        all_deps = []
+        for index in dependencies:
+            head = get_property(dependencies, index, "head")
+            label = get_property(dependencies, index, "dep")
+            all_deps.append((head, label, index))
+        test_dependencies[key] = all_deps
+    return test_dependencies
 
 def predict(filepath, max=-3.14, start=1, print_status=False, k=1):
     # print("[Testing]")
@@ -631,7 +552,7 @@ def predict(filepath, max=-3.14, start=1, print_status=False, k=1):
     tested_sentences = []
     sentence = None
     num = 0
-    real_dependencies = {}
+    real_properties = {}
     predictions = {}
     while line:
         line = line.strip()
@@ -645,7 +566,7 @@ def predict(filepath, max=-3.14, start=1, print_status=False, k=1):
                 tested_sentences.append(" ".join(sentence))
                 sent_pred = parser.predict_actions(sentence, properties, classifier)
                 predictions[num - 1] = sent_pred
-                real_dependencies[num - 1] = test_properties
+                real_properties[num - 1] = test_properties
                 if print_status:
                     print "%d:\t%s" % (num, sentence)
 
@@ -676,6 +597,7 @@ def predict(filepath, max=-3.14, start=1, print_status=False, k=1):
 
     infile.close()
 
+    real_dependencies = get_dependencies_from_properties(real_properties)
     return (predictions, real_dependencies)
 
 def incremental_train(filepath):
@@ -692,68 +614,15 @@ def incremental_train(filepath):
 
 def single_experiment(filepath):
     test_start = 11
-    test_num = 1
+    test_num = 5
     #
     # train('../welt-annotation-spatial.txt', train_num, train_start)
     (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', max=test_num, start=test_start)
-    print predictions
     accuracy = get_raw_accuracy(predictions, real_dependencies)
     print accuracy
 
-def new_design(filepath):
-    start = 1
-    max = 10
-    classifier = ParseClassifier()
-    parser = Parser()
-    infile = open(filepath, 'r')
-    line = infile.readline()
-    first = True
-    training = False
-    properties = {}
-    sentence = None
-    num = 0
 
-    while line:
-        line = line.strip()
-        line = line.lower()
-        if line == "":
-
-            # get features here
-            parser.reset()
-            num += 1
-            if num >= start:
-                sent_features = parser.get_state_sequence(sentence, properties)
-                classifier.add_training_data(sent_features)
-                training = True
-                if training:
-                    print "%d:\t%s" % (num, sentence)
-
-
-            if num == max + start - 1:
-                break
-
-            properties = {}
-            first = True
-
-
-        elif first:
-            line = line.split()
-            line = [w.strip() for w in line]
-            sentence = line
-            first = False
-        else:
-            line = line.split('\t')
-            line = [w.strip() for w in line]
-            pos = int(line[columns["index"]])
-            properties[pos] = line[columns["index"] + 1:]
-
-        line = infile.readline()
-
-    classifier.train()
-    infile.close()
-    # print "Completed training"
-
-new_design('../welt-annotation-spatial.txt')
+# new_design('../welt-annotation-spatial.txt')
 # predict('../welt-annotation-spatial.txt', start=11, max=1 print_status=True, k=4)
 
-# single_experiment('../welt-annotation-spatial.txt')
+single_experiment('../welt-annotation-spatial.txt')
