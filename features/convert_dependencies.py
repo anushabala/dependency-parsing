@@ -10,7 +10,6 @@ import pickle
 # Use Weka - try different classification algs for the dependency labels, for parser action
 # start using differeent method when you have more training data?
 #
-# todo: Add methods for LA, RA, S instead of just hardcoding in what they do
 # todo: handle cases where LA or RA is predicted but can't occur - count as misclassification?
 # todo: clean up generally
 
@@ -335,32 +334,40 @@ class Parser:
         self.A = []  # the list of dependents on any given token
         i = 0
         while len(self.I) > 0:
-
             state = self.get_current_state(properties)
+
             if len(self.S) == 0:
+                # features.append(("S", 'NULL', state))
+                # self.S.append(self.I[0])
+                # self.I = self.I[1:]
                 features.append(("S", 'NULL', state))
-                self.S.append(self.I[0])
-                self.I = self.I[1:]
+                self.shift()
+
             else:
                 stack_top = self.S[-1]
                 stack_head = get_property(properties, stack_top, "head")
                 input_head = get_property(properties, self.I[0], "head")
                 if stack_head == self.I[0]:
-                    self.S.pop()
+
                     dep = get_property(properties, stack_top, "dep")
                     features.append(("LA", dep, state))
-                    self.A.append((stack_head, dep, stack_top))
+                    # self.S.pop()
+                    # self.A.append((stack_head, dep, stack_top))
+                    self.left_arc(stack_head, dep, stack_top)
                 elif input_head == stack_top:
                     dep = get_property(properties, self.I[0], "dep")
                     features.append(("RA", dep, state))
-                    self.A.append((input_head, dep, self.I[0]))
-                    self.S.append(self.I[0])
-                    self.I = self.I[1:]
+                    # self.A.append((input_head, dep, self.I[0]))
+                    # self.S.append(self.I[0])
+                    # self.I = self.I[1:]
+                    self.right_arc(input_head, dep)
 
                 else:
                     features.append(("S", 'NULL', state))
-                    self.S.append(self.I[0])
-                    self.I = self.I[1:]
+                    self.shift()
+                    # self.S.append(self.I[0])
+                    # self.I = self.I[1:]
+
         #final state
         state = self.get_current_state(properties)
         features.append(("END", 'NULL', state))
@@ -374,6 +381,18 @@ class Parser:
         # print "Dependencies: %s\n" % self.A
 
         return modified_features
+
+    def left_arc(self, head, label, dep):
+        self.S.pop()
+        self.A.append((head, label, dep))
+    def right_arc(self, head, label):
+        self.A.append((head, label, self.I[0]))
+        self.S.append(self.I[0])
+        self.I = self.I[1:]
+
+    def shift(self):
+        self.S.append(self.I[0])
+        self.I = self.I[1:]
 
     def predict_actions(self, sentence, properties, classifier):
         # print "extracting"
@@ -391,25 +410,25 @@ class Parser:
             (action, dep) = classifier.get_next_action(lex_state)
             features.append((action, dep, state))
             if action == actions["S"]:
-                self.S.append(self.I[0])
-                self.I = self.I[1:]
+                self.shift()
 
             elif action == actions["LA"]:
                 stack_top = self.S[-1]
-                self.S.pop()
                 set_property(properties, stack_top, "head", self.I[0])
                 set_property(properties, stack_top, "dep", dep)
-
-                self.A.append((self.I[0], dep, stack_top))
+                self.left_arc(self.I[0], dep, stack_top)
+                # self.S.pop()
+                # self.A.append((self.I[0], dep, stack_top))
 
             elif action == actions["RA"]:
                 stack_top = self.S[-1]
                 set_property(properties, self.I[0], "head", stack_top)
                 set_property(properties, self.I[0], "dep", dep)
 
-                self.A.append((stack_top, dep, self.I[0]))
-                self.S.append(self.I[0])
-                self.I = self.I[1:]
+                self.right_arc(stack_top, dep)
+                # self.A.append((stack_top, dep, self.I[0]))
+                # self.S.append(self.I[0])
+                # self.I = self.I[1:]
 
         state = self.get_current_state(properties)
         features.append(("END", 'NULL', state))
@@ -537,11 +556,11 @@ def get_dependencies_from_properties(real_properties):
         test_dependencies[key] = all_deps
     return test_dependencies
 
-def predict(filepath, max=-3.14, start=1, print_status=False, k=1):
+def predict(filepath, model_path, max=-3.14, start=1, print_status=False, k=1):
     # print("[Testing]")
     parser = Parser(k)
     classifier = ParseClassifier()
-    classifier.load_model("../training.dat")
+    classifier.load_model(model_path)
     infile = open(filepath, 'r')
     line = infile.readline()
     first = True
@@ -615,7 +634,7 @@ def single_experiment(filepath):
     test_num = 5
     #
     # train('../welt-annotation-spatial.txt', train_num, train_start)
-    (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', max=test_num, start=test_start)
+    (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', '../training.dat', max=test_num, start=test_start)
     accuracy = get_raw_accuracy(predictions, real_dependencies)
     print accuracy
 
