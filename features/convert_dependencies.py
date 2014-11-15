@@ -156,9 +156,9 @@ class ParseClassifier:
     def __train_svm(self):
         self.action_classifier = svm.SVC()
         self.dep_classifier = svm.SVC()
-        action_labels = np.array([f[0] for f in self.model])
-        dep_labels = np.array([f[1] for f in self.model])
-        fvs = np.array([f[2].values() for f in self.model])
+        action_labels = [f[0] for f in self.model]
+        dep_labels = [f[1] for f in self.model]
+        fvs = [f[2].values() for f in self.model]
         self.action_classifier.fit(fvs, action_labels)
         self.dep_classifier.fit(fvs, dep_labels)
 
@@ -182,10 +182,13 @@ class ParseClassifier:
 
     def get_next_action(self, state, mode="knn"):
         fv_state = self.extractor.convert_instance_to_fv(state)
+        if mode=="linear_svm":
+            (chosen_action, chosen_dep) = self.__linear_svm(fv_state)
+            return (chosen_action, self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
+        elif mode=="knn":
+            (chosen_action, chosen_dep) = self.__knn(fv_state)
+            return (chosen_action, self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
 
-        (chosen_action, chosen_dep) = self.__knn(fv_state)
-
-        return (chosen_action, self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
 
     def __knn(self, fv_state):
         min_distances = []
@@ -226,7 +229,11 @@ class ParseClassifier:
         return (chosen_action, chosen_dep)
 
     def __linear_svm(self, fv_state):
-        pass
+
+        pred_action = self.action_classifier.predict(fv_state.values())[0]
+        pred_dep = self.dep_classifier.predict(fv_state.values())[0]
+
+        return (pred_action, pred_dep)
 
 class Parser:
     def __init__(self, k=1):
@@ -427,6 +434,8 @@ class Parser:
             state = self.get_current_state(properties)
             lex_state = [self.mappings[f] if f in self.mappings.keys() else f for f in state]
             (action, dep) = classifier.get_next_action(lex_state, mode="linear_svm")
+            if (action==actions["LA"] or action==actions["RA"]) and len(self.S) == 0:
+                action = actions["S"]
             features.append((action, dep, state))
             if action == actions["S"]:
                 self.shift()
@@ -532,11 +541,13 @@ def train(filepath, train_file, max=-10, start=1, print_status=False):
 
     classifier.train(train_file, mode="svm")
     infile.close()
+    return classifier
     # print "Completed training"
 
 
 def get_raw_accuracy(predictions, test_dependencies):
-
+    print predictions
+    print test_dependencies
     num = 0
     total = 0.0
     correct = 0.0
@@ -643,10 +654,11 @@ def single_experiment(filepath):
     test_start = train_start + train_num
     test_num = 5
     #
-    train('../welt-annotation-spatial.txt', '../training.dat', train_num, train_start)
-    # (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', '../training.dat', max=test_num, start=test_start)
-    # accuracy = get_raw_accuracy(predictions, real_dependencies)
-    # print accuracy
+    classifier = train('../welt-annotation-spatial.txt', '../training.dat', train_num, train_start)
+    (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', '../training.dat', max=test_num, start=test_start, classifier=classifier)
+
+    accuracy = get_raw_accuracy(predictions, real_dependencies)
+    print accuracy
 
 
 # new_design('../welt-annotation-spatial.txt')
