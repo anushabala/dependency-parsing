@@ -11,9 +11,12 @@ import pickle
 # start using differeent method when you have more training data?
 #
 # todo: handle cases where LA or RA is predicted but can't occur - count as misclassification?
-# todo: clean up generally
+# todo: write model and training data separately
 
 import datetime
+import numpy as np
+from sklearn import svm
+
 
 columns = {"index": 0, "word": 1, "stem": 2, "morph": 3, "pos": 4, "head": 5, "dep": 6}
 actions = {"S": 1, "LA": 2, "RA": 3, "END": 4}
@@ -30,8 +33,6 @@ def get_property(properties, pos, propName):
 
 def set_property(properties, pos, propName, new_value):
     relevant_props = properties[pos]
-    # while columns[propName] - 1 <= len(relevant_props):
-    #     relevant_props.append('')
     relevant_props[columns[propName] - 1] = new_value
 
 class FeatureExtractor:
@@ -91,14 +92,20 @@ class ParseClassifier:
         self.model_path = "../models/model%s."
         self.extractor = FeatureExtractor()
         self.training_data = []
+        self.action_classifier = None
+        self.dep_classifier = None
         self.model = None
         self.k = k
+        self.classifiers = { "knn": self.__knn,
+                             "linear_svm": self.__linear_svm}
+        self.train_funs = {"svm": self.__train_svm}
+
 
     def add_training_data(self, states):
         self.extractor.add_fv_mappings(states)
         self.training_data.append(states)
 
-    def write_training_data(self, filepath, fvs):
+    def write_training_data(self, filepath, fvs, model=None):
         train_file = open(filepath, 'w')
         for (action, dep, vectors) in fvs:
             vecs = [("%d:%s" % (f, v)) for (f, v) in vectors.iteritems()]
@@ -110,7 +117,10 @@ class ParseClassifier:
         st = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S')
 
         model_file = open(self.model_path % st, 'wb')
-        pickle.dump(fvs, model_file)
+        if model==None:
+            pickle.dump(fvs, model_file)
+        else:
+            pickle.dump(model, model_file)
         model_file.close()
 
         self.extractor.write_fv_mappings(self.fv_mapping_path % st)
@@ -119,22 +129,38 @@ class ParseClassifier:
             mapping_file = open(self.mapping_path, 'rb')
             file_map = pickle.load(mapping_file)
             mapping_file.close()
-            file_map[filepath] = (self.model_path % st, self.fv_mapping_path % st)
+            file_map[filepath] = [self.model_path % st, self.fv_mapping_path % st]
 
             mapping_file = open(self.mapping_path, 'wb')
             pickle.dump(file_map, mapping_file)
             mapping_file.close()
         else:
-            file_map = {filepath: (self.model_path % st, self.fv_mapping_path % st)}
+            file_map = {filepath: [self.model_path % st, self.fv_mapping_path % st]}
             mapping_file = open(self.mapping_path, 'wb')
             pickle.dump(file_map,mapping_file)
             mapping_file.close()
 
 
-    def train(self, filepath='../training.dat'):
+    def train(self, filepath='../training.dat', mode="knn"):
         training_fvs = self.extractor.convert_to_fvs(self.training_data)
         self.model = training_fvs
-        self.write_training_data(filepath, training_fvs)
+        if mode=="svm":
+            self.__train_svm()
+            # self.write_training_data(filepath, training_fvs, model=trained_svm)
+        else:
+            self.write_training_data(filepath, training_fvs)
+
+
+
+
+    def __train_svm(self):
+        self.action_classifier = svm.SVC()
+        self.dep_classifier = svm.SVC()
+        action_labels = np.array([f[0] for f in self.model])
+        dep_labels = np.array([f[1] for f in self.model])
+        fvs = np.array([f[2].values() for f in self.model])
+        self.action_classifier.fit(fvs, action_labels)
+        self.dep_classifier.fit(fvs, dep_labels)
 
     def load_model(self, filepath):
         if not os.path.isfile(self.mapping_path):
@@ -154,9 +180,15 @@ class ParseClassifier:
             self.extractor.load_fv_mappings(fv_file)
 
 
-    def get_next_action(self, state):
-        min_distances = []
+    def get_next_action(self, state, mode="knn"):
         fv_state = self.extractor.convert_instance_to_fv(state)
+
+        (chosen_action, chosen_dep) = self.__knn(fv_state)
+
+        return (chosen_action, self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
+
+    def __knn(self, fv_state):
+        min_distances = []
         for j in range(0, len(self.model)):
             f = self.model[j]
             train_vectors = f[2]
@@ -185,16 +217,16 @@ class ParseClassifier:
         chosen_action = max(next_action.iteritems(), key=operator.itemgetter(1))[0]
         chosen_dep = max(next_dep.iteritems(), key=operator.itemgetter(1))[0]
 
-
-
         if chosen_action == actions["S"] and chosen_dep != 0:
             chosen_dep = 0
         elif chosen_action != actions["S"] and chosen_dep == 0:
             chosen_dep = \
                 max([(key, value) for (key, value) in next_dep.iteritems() if value != 0], key=operator.itemgetter(1))[0]
 
+        return (chosen_action, chosen_dep)
 
-        return (chosen_action, self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
+    def __linear_svm(self, fv_state):
+        pass
 
 class Parser:
     def __init__(self, k=1):
@@ -337,9 +369,6 @@ class Parser:
             state = self.get_current_state(properties)
 
             if len(self.S) == 0:
-                # features.append(("S", 'NULL', state))
-                # self.S.append(self.I[0])
-                # self.I = self.I[1:]
                 features.append(("S", 'NULL', state))
                 self.shift()
 
@@ -351,22 +380,15 @@ class Parser:
 
                     dep = get_property(properties, stack_top, "dep")
                     features.append(("LA", dep, state))
-                    # self.S.pop()
-                    # self.A.append((stack_head, dep, stack_top))
                     self.left_arc(stack_head, dep, stack_top)
                 elif input_head == stack_top:
                     dep = get_property(properties, self.I[0], "dep")
                     features.append(("RA", dep, state))
-                    # self.A.append((input_head, dep, self.I[0]))
-                    # self.S.append(self.I[0])
-                    # self.I = self.I[1:]
                     self.right_arc(input_head, dep)
 
                 else:
                     features.append(("S", 'NULL', state))
                     self.shift()
-                    # self.S.append(self.I[0])
-                    # self.I = self.I[1:]
 
         #final state
         state = self.get_current_state(properties)
@@ -374,11 +396,8 @@ class Parser:
 
         for (state, dep, feat) in features:
             feat = [self.mappings[f] if f in self.mappings.keys() else f for f in feat]
-            # print feat
-            # print "%s\t%s\t%s" % (state, dep, "\t".join(feat))
             modified_features.append((state, dep, feat))
         self.A = [(self.mappings[h], l, self.mappings[d]) for (h, l, d) in self.A]
-        # print "Dependencies: %s\n" % self.A
 
         return modified_features
 
@@ -407,7 +426,7 @@ class Parser:
         while len(self.I) > 0:
             state = self.get_current_state(properties)
             lex_state = [self.mappings[f] if f in self.mappings.keys() else f for f in state]
-            (action, dep) = classifier.get_next_action(lex_state)
+            (action, dep) = classifier.get_next_action(lex_state, mode="linear_svm")
             features.append((action, dep, state))
             if action == actions["S"]:
                 self.shift()
@@ -417,8 +436,6 @@ class Parser:
                 set_property(properties, stack_top, "head", self.I[0])
                 set_property(properties, stack_top, "dep", dep)
                 self.left_arc(self.I[0], dep, stack_top)
-                # self.S.pop()
-                # self.A.append((self.I[0], dep, stack_top))
 
             elif action == actions["RA"]:
                 stack_top = self.S[-1]
@@ -426,21 +443,14 @@ class Parser:
                 set_property(properties, self.I[0], "dep", dep)
 
                 self.right_arc(stack_top, dep)
-                # self.A.append((stack_top, dep, self.I[0]))
-                # self.S.append(self.I[0])
-                # self.I = self.I[1:]
 
         state = self.get_current_state(properties)
         features.append(("END", 'NULL', state))
 
         for (action, dep, state) in features:
             state = [self.mappings[f] if f in self.mappings.keys() else f for f in state]
-            # print feat
-            # print "%s\t%s\t%s" % (state, dep, "\t".join(feat))
-            # print len(feat)
             modified_features.append((action, dep, state))
 
-        # modified_A = [(self.mappings[h], FV_MAPPINGS[LABEL][l], self.mappings[d]) for (h, l, d) in self.A]
         self.find_root(sentence)
 
         return self.A
@@ -470,7 +480,7 @@ class Parser:
 
 
 
-def train(filepath, max=-10, start=1, print_status=False):
+def train(filepath, train_file, max=-10, start=1, print_status=False):
     # print("[Training]")
     global FV_MAPPINGS
     FV_MAPPINGS = defaultdict(lambda: ["NULL"])
@@ -490,7 +500,6 @@ def train(filepath, max=-10, start=1, print_status=False):
         line = line.lower()
         if line == "":
 
-            # get features here
             parser.reset()
             num += 1
             if num >= start:
@@ -521,16 +530,13 @@ def train(filepath, max=-10, start=1, print_status=False):
 
         line = infile.readline()
 
-    classifier.train('../training.dat')
+    classifier.train(train_file, mode="svm")
     infile.close()
     # print "Completed training"
 
 
 def get_raw_accuracy(predictions, test_dependencies):
 
-
-    print "Real dependencies:\t\t", test_dependencies
-    print "Predicted dependencies:\t", predictions
     num = 0
     total = 0.0
     correct = 0.0
@@ -556,11 +562,13 @@ def get_dependencies_from_properties(real_properties):
         test_dependencies[key] = all_deps
     return test_dependencies
 
-def predict(filepath, model_path, max=-3.14, start=1, print_status=False, k=1):
+def predict(filepath, model_path=None, max=-3.14, start=1, print_status=False, k=1, classifier=None):
     # print("[Testing]")
     parser = Parser(k)
-    classifier = ParseClassifier()
-    classifier.load_model(model_path)
+    if classifier==None:
+        classifier = ParseClassifier()
+        classifier.load_model(model_path)
+
     infile = open(filepath, 'r')
     line = infile.readline()
     first = True
@@ -576,7 +584,6 @@ def predict(filepath, model_path, max=-3.14, start=1, print_status=False, k=1):
         line = line.lower()
         if line == "":
 
-            # get features here
             parser.reset()
             num += 1
             if num >= start:
@@ -618,28 +625,32 @@ def predict(filepath, model_path, max=-3.14, start=1, print_status=False, k=1):
     return (predictions, real_dependencies)
 
 def incremental_train(filepath):
-    for i in range(1, 75, 5):
-        k = max(i/2 - 1, 1)
+    train_file = '../training.dat'
+    for i in range(1, 25, 5):
+        k = 1
         train_start = 1
         train_num = i
         test_start = train_start + train_num
-        train(filepath, train_num, train_start)
-        (predictions, real_dependencies) = predict(filepath, start=test_start, k=k, )
+        train(filepath, train_file, train_num, train_start)
+        (predictions, real_dependencies) = predict(filepath, train_file, start=test_start, k=k, )
         accuracy = get_raw_accuracy(predictions, real_dependencies)
         print("Training set size: %d\tk: %d\tAccuracy: %2.3f" % (train_num, k, accuracy))
 
 
 def single_experiment(filepath):
-    test_start = 11
+    train_num = 10
+    train_start=1
+    test_start = train_start + train_num
     test_num = 5
     #
-    # train('../welt-annotation-spatial.txt', train_num, train_start)
-    (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', '../training.dat', max=test_num, start=test_start)
-    accuracy = get_raw_accuracy(predictions, real_dependencies)
-    print accuracy
+    train('../welt-annotation-spatial.txt', '../training.dat', train_num, train_start)
+    # (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', '../training.dat', max=test_num, start=test_start)
+    # accuracy = get_raw_accuracy(predictions, real_dependencies)
+    # print accuracy
 
 
 # new_design('../welt-annotation-spatial.txt')
 # predict('../welt-annotation-spatial.txt', start=11, max=1 print_status=True, k=4)
 
 single_experiment('../welt-annotation-spatial.txt')
+# incremental_train('../welt-annotation-spatial.txt')
