@@ -546,20 +546,23 @@ def train(filepath, train_file, max=-10, start=1, print_status=False):
 
 
 def get_raw_accuracy(predictions, test_dependencies):
-    print predictions
-    print test_dependencies
     num = 0
     total = 0.0
-    correct = 0.0
+    correct_dep = 0.0
+    correct_arc = 0.0
 
     for key in test_dependencies.keys():
         for (head, label, dep) in test_dependencies[key]:
             total += 1
-            if (head, label, dep) in predictions[key]:
-                correct += 1
+            for (pred_head, pred_label, pred_dep) in predictions[key]:
+                if head == pred_head and dep == pred_dep:
+                    correct_arc += 1
+                    if label == pred_label:
+                        correct_dep += 1
 
-    accuracy = correct / total
-    return accuracy
+    dep_accuracy = correct_dep / total
+    arc_accuracy = correct_arc/total
+    return (dep_accuracy, arc_accuracy)
 
 def get_dependencies_from_properties(real_properties):
     test_dependencies = {}
@@ -642,10 +645,10 @@ def incremental_train(filepath):
         train_start = 1
         train_num = i
         test_start = train_start + train_num
-        train(filepath, train_file, train_num, train_start)
-        (predictions, real_dependencies) = predict(filepath, train_file, start=test_start, k=k, )
-        accuracy = get_raw_accuracy(predictions, real_dependencies)
-        print("Training set size: %d\tk: %d\tAccuracy: %2.3f" % (train_num, k, accuracy))
+        classifier = train(filepath, train_file, train_num, train_start)
+        (predictions, real_dependencies) = predict(filepath, train_file, start=test_start, k=k, classifier=classifier)
+        (dep_accuracy, arc_accuracy) = get_raw_accuracy(predictions, real_dependencies)
+        print("Training set size: %d\tk: %d\tArc accuracy: %2.3f\tLabel accuracy: %2.3f" % (train_num, k, arc_accuracy, dep_accuracy))
 
 
 def single_experiment(filepath):
@@ -664,5 +667,5 @@ def single_experiment(filepath):
 # new_design('../welt-annotation-spatial.txt')
 # predict('../welt-annotation-spatial.txt', start=11, max=1 print_status=True, k=4)
 
-single_experiment('../welt-annotation-spatial.txt')
-# incremental_train('../welt-annotation-spatial.txt')
+# single_experiment('../welt-annotation-spatial.txt')
+incremental_train('../welt-annotation-spatial.txt')
