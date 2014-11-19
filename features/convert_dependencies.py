@@ -1,8 +1,7 @@
 # Written by: Anusha Balakrishnan
 # Date: 10/6/14
 from collections import defaultdict
-import os
-import time
+from random import randint
 from heapq import heappush, nsmallest
 import math
 import operator
@@ -35,7 +34,9 @@ def set_property(properties, pos, propName, new_value):
     relevant_props = properties[pos]
     relevant_props[columns[propName] - 1] = new_value
 
-class DataWriter:
+class DataParser:
+    def __init__(self):
+        self.all_data = []
     def write_data(self, fvs, filepath):
         out_file = open(filepath, 'w')
         for (action, dep, vectors) in fvs:
@@ -44,6 +45,58 @@ class DataWriter:
             line = "%s\t%s\t%s\n" % (str(action), str(dep), vecs)
             out_file.write(line)
         out_file.close()
+
+    def load_data(self, filepath):
+        # print("[Testing]")
+
+        infile = open(filepath, 'r')
+        line = infile.readline()
+        properties = []
+        while line:
+            line = line.strip()
+            line = line.lower()
+            if line == "":
+                self.all_data.append(properties)
+                properties = []
+            else:
+                line = line.strip()
+                properties.append(line)
+            line = infile.readline()
+
+        infile.close()
+
+    def random_split(self, train_file, test_file, ratio):
+        train_file = open(train_file, 'w')
+        test_file = open(test_file, 'w')
+        train_num = int(ratio * len(self.all_data))
+        current = 0
+        train_data = []
+        test_data = []
+        while current<train_num:
+            pos = randint(current, len(self.all_data)-1)
+            train_data.append(self.all_data[pos])
+            self.all_data[pos], self.all_data[current] = self.all_data[current], self.all_data[pos]
+            current += 1
+
+        while current<len(self.all_data):
+            test_data.append(self.all_data[current])
+            current+=1
+
+        print (len(train_data), len(test_data))
+        for sentence in train_data:
+            for line in sentence:
+                train_file.write(line+"\n")
+            train_file.write("\n")
+        for sentence in test_data:
+            for line in sentence:
+                test_file.write(line+"\n")
+            test_file.write("\n")
+
+        train_file.close()
+        test_file.close()
+
+
+
 
 class FeatureExtractor:
     def __init__(self):
@@ -207,7 +260,7 @@ class Parser:
         self.I = []
         self.A = []  # the list of dependents on any given token
         self.mappings = {}
-        self.k = k
+
 
 
     def get_current_state(self, properties):
@@ -455,7 +508,7 @@ class Parser:
 
 
 
-def train(filepath, train_file, max=-10, start=1, print_status=False, model="knn"):
+def train(filepath, train_file, print_status=False, model="knn"):
     # print("[Training]")
     global FV_MAPPINGS
     FV_MAPPINGS = defaultdict(lambda: ["NULL"])
@@ -473,17 +526,12 @@ def train(filepath, train_file, max=-10, start=1, print_status=False, model="knn
         line = line.strip()
         line = line.lower()
         if line == "":
-
+            num +=1
             parser.reset()
-            num += 1
-            if num >= start:
-                sent_features = parser.get_state_sequence(sentence, properties)
-                training_data.append(sent_features)
-                training = True
-                if training and print_status:
-                    print "%d:\t%s" % (num, sentence)
-            if num == max + start - 1:
-                break
+            sent_features = parser.get_state_sequence(sentence, properties)
+            training_data.append(sent_features)
+            if print_status:
+                print "%d:\t%s" % (num, sentence)
             properties = {}
             first = True
         elif first:
@@ -501,7 +549,7 @@ def train(filepath, train_file, max=-10, start=1, print_status=False, model="knn
 
     classifier.train(training_data)
     training_fvs = classifier.get_training_data()
-    writer = DataWriter()
+    writer = DataParser()
     writer.write_data(training_fvs, train_file)
 
     return classifier
@@ -527,6 +575,31 @@ def get_raw_accuracy(predictions, test_dependencies):
     arc_accuracy = correct_arc/total
     return (dep_accuracy, arc_accuracy)
 
+def get_f1(predictions, test_dependencies):
+    pass
+
+def get_precision(predictions, test_dependencies):
+    true_arc = 0.0
+    labeled_arc = 0.0
+    true_dep = 0.0
+    labeled_dep = 0.0
+
+    # for key in test_dependencies.keys():
+    #     for (head, label, dep) in test_dependencies[key]:
+    #         total += 1
+    #         for (pred_head, pred_label, pred_dep) in predictions[key]:
+    #             if head == pred_head and dep == pred_dep:
+    #                 correct_arc += 1
+    #                 if label == pred_label:
+    #                     correct_dep += 1
+    #
+    # dep_accuracy = correct_dep / total
+    # arc_accuracy = correct_arc/total
+    # return (dep_accuracy, arc_accuracy)
+
+def get_recall(predictions, test_dependencies):
+    pass
+
 def get_dependencies_from_properties(real_properties):
     test_dependencies = {}
     for key in real_properties.keys():
@@ -539,11 +612,11 @@ def get_dependencies_from_properties(real_properties):
         test_dependencies[key] = all_deps
     return test_dependencies
 
-def predict(filepath, model_path=None, max=-3.14, start=1, print_status=False, k=1, classifier=None, mode="knn"):
+def predict(filepath, model_path=None, print_status=False, k=1, classifier=None, mode="knn"):
     # print("[Testing]")
-    parser = Parser(k)
+    parser = Parser()
     if classifier==None:
-        classifier = ParseClassifier()
+        classifier = ParseClassifier(k, mode=mode)
         classifier.load_model(model_path)
 
     infile = open(filepath, 'r')
@@ -563,17 +636,13 @@ def predict(filepath, model_path=None, max=-3.14, start=1, print_status=False, k
 
             parser.reset()
             num += 1
-            if num >= start:
-                tested_sentences.append(" ".join(sentence))
-                sent_pred = parser.predict_actions(sentence, properties, classifier, mode=mode)
-                predictions[num - 1] = sent_pred
-                real_properties[num - 1] = test_properties
-                if print_status:
-                    print "%d:\t%s" % (num, sentence)
+            tested_sentences.append(" ".join(sentence))
+            sent_pred = parser.predict_actions(sentence, properties, classifier, mode=mode)
+            predictions[num - 1] = sent_pred
+            real_properties[num - 1] = test_properties
+            if print_status:
+                print "%d:\t%s" % (num, sentence)
 
-
-            if num == max + start - 1:
-                break
             properties = defaultdict(list)
             test_properties = defaultdict(list)
             first = True
@@ -601,35 +670,39 @@ def predict(filepath, model_path=None, max=-3.14, start=1, print_status=False, k
     real_dependencies = get_dependencies_from_properties(real_properties)
     return (predictions, real_dependencies)
 
-def incremental_train(filepath, mode):
-    train_file = '../training.dat'
+def incremental_train(filepath, mode, k=1, folds=5):
+    for i in range(10, 11, 10):
+        cross_validate(filepath, i, mode, k)
 
-    for i in range(1, 75, 10):
-        k = 1
-        train_start = 1
-        train_num = i
-        test_start = train_start + train_num
-        classifier = train(filepath, train_file, train_num, train_start, model=mode)
-        (predictions, real_dependencies) = predict(filepath, train_file, start=test_start, k=k, classifier=classifier, mode=mode)
+
+
+def cross_validate(filepath, i, mode, k=1, folds=5):
+    parser = DataParser()
+    parser.load_data(filepath)
+    train_file = '../training_data.txt'
+    test_file = '../test_data.txt'
+    train_fvs = '../training.dat'
+    dep_f1 = 0
+    arc_f1 = 0
+    for j in range(0, folds):
+        parser.random_split(train_file, test_file, 1.0/i)
+
+        classifier = train(train_file, train_fvs, model=mode)
+        (predictions, real_dependencies) = predict(test_file, k=k, classifier=classifier, mode=mode)
         (dep_accuracy, arc_accuracy) = get_raw_accuracy(predictions, real_dependencies)
-        print("Training set size: %d\tk: %d\tArc accuracy: %2.3f\tLabel accuracy: %2.3f" % (train_num, k, arc_accuracy, dep_accuracy))
-
+        print("Training set size: %d%% \tk: %d\tArc accuracy: %2.3f\tLabel accuracy: %2.3f" % (i, k, arc_accuracy, dep_accuracy))
 
 def single_experiment(filepath):
-    train_num = 10
-    train_start=1
-    test_start = train_start + train_num
-    test_num = 5
-    #
-    classifier = train('../welt-annotation-spatial.txt', '../training.dat', train_num, train_start)
-    # (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', '../training.dat', max=test_num, start=test_start, classifier=classifier)
 
-    # accuracy = get_raw_accuracy(predictions, real_dependencies)
-    # print accuracy
+    classifier = train('../welt-annotation-spatial.txt', '../training.dat', model="svm")
+    (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', '../training.dat', classifier=classifier)
+
+    accuracy = get_raw_accuracy(predictions, real_dependencies)
+    print accuracy
 
 
 # new_design('../welt-annotation-spatial.txt')
 # predict('../welt-annotation-spatial.txt', start=11, max=1 print_status=True, k=4)
 
-single_experiment('../welt-annotation-spatial.txt')
-# incremental_train('../welt-annotation-spatial.txt', "knn")
+# single_experiment('../welt-annotation-spatial.txt')
+# incremental_train('../welt-annotation-spatial.txt', "knn", 1)
