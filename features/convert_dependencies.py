@@ -14,7 +14,9 @@ import pickle
 
 import datetime
 import numpy as np
-from sklearn import svm
+from sklearn.svm import SVC
+from sklearn import tree
+from sklearn.neighbors import KNeighborsClassifier
 
 
 columns = {"index": 0, "word": 1, "stem": 2, "morph": 3, "pos": 4, "head": 5, "dep": 6}
@@ -82,7 +84,7 @@ class DataParser:
             test_data.append(self.all_data[current])
             current+=1
 
-        print (len(train_data), len(test_data))
+
         for sentence in train_data:
             for line in sentence:
                 train_file.write(line+"\n")
@@ -95,6 +97,7 @@ class DataParser:
         train_file.close()
         test_file.close()
 
+        return (len(train_data), len(test_data))
 
 
 
@@ -148,6 +151,16 @@ class FeatureExtractor:
         self.FV_MAPPINGS = pickle.load(mapping_file)
         mapping_file.close()
 
+    def convert_to_values(self, values):
+        new_val = []
+        for f in values:
+            pos = 0
+            if '1' in f:
+                pos = f.index('1') + 1
+            new_val.append(pos)
+
+        return new_val
+
 class ParseClassifier:
     def __init__(self, k=1, mode="knn"):
         self.extractor = FeatureExtractor()
@@ -167,6 +180,10 @@ class ParseClassifier:
         if self.mode=="svm":
             self.__train_svm()
             # self.write_training_data(filepath, training_fvs, model=trained_svm)
+        elif self.mode=="decision_tree":
+            self.__train_decision_tree()
+        else:
+            self.__train_knn()
 
     def add_fv_mappings(self, data):
         for state in data:
@@ -182,13 +199,22 @@ class ParseClassifier:
         elif self.mode=="svm":
             pickle.dump(self.action_classifier, filepath)
             pickle.dump(self.dep_classifier, dep_classifier_path)
+        elif self.mode=="linear_svm":
+            pickle.dump(self.action_classifier, filepath)
+            pickle.dump(self.dep_classifier, dep_classifier_path)
 
     def __train_svm(self):
-        self.action_classifier = svm.SVC()
-        self.dep_classifier = svm.SVC()
+        self.action_classifier = SVC(kernel='rbf')
+        self.dep_classifier = SVC(kernel='rbf')
         action_labels = [f[0] for f in self.training_data]
         dep_labels = [f[1] for f in self.training_data]
         fvs = [f[2].values() for f in self.training_data]
+        new_fvs = []
+        for f in fvs:
+            f = self.extractor.convert_to_values(f)
+            new_fvs.append(f)
+        fvs = new_fvs
+
         self.action_classifier.fit(fvs, action_labels)
         self.dep_classifier.fit(fvs, dep_labels)
 
@@ -198,18 +224,52 @@ class ParseClassifier:
         elif self.mode=="linear_svm":
             self.action_classifier = pickle.load(filepath)
             self.dep_classifier = pickle.load(dep_classifier_path)
+        elif self.mode=="decision_tree":
+            self.action_classifier = pickle.load(filepath)
+            self.dep_classifier = pickle.load(dep_classifier_path)
 
-    def get_next_action(self, state, mode="knn"):
+    def get_next_action(self, state):
+
         fv_state = self.extractor.convert_instance_to_fv(state)
-        if mode=="svm":
+        if self.mode=="svm":
             (chosen_action, chosen_dep) = self.__svm(fv_state)
             return (chosen_action, self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
-        elif mode=="knn":
-            (chosen_action, chosen_dep) = self.__knn(fv_state)
+        elif self.mode=="decision_tree":
+            (chosen_action, chosen_dep) = self.__decision_tree(fv_state)
+            return (chosen_action, self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
+        elif self.mode=="knn":
+            (chosen_action, chosen_dep) = self.__sklearn_knn(fv_state)
             return (chosen_action, self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
 
+    def __train_decision_tree(self):
+        self.action_classifier = tree.DecisionTreeClassifier()
+        self.dep_classifier = tree.DecisionTreeClassifier()
+        action_labels = [f[0] for f in self.training_data]
+        dep_labels = [f[1] for f in self.training_data]
+        fvs = [f[2].values() for f in self.training_data]
+        new_fvs = []
+        for f in fvs:
+            f = self.extractor.convert_to_values(f)
+            new_fvs.append(f)
+        fvs = new_fvs
 
-    def __knn(self, fv_state):
+        self.action_classifier.fit(fvs, action_labels)
+        self.dep_classifier.fit(fvs, dep_labels)
+    def __train_knn(self):
+        self.action_classifier = KNeighborsClassifier(n_neighbors=self.k)
+        self.dep_classifier = KNeighborsClassifier(n_neighbors=self.k)
+        action_labels = [f[0] for f in self.training_data]
+        dep_labels = [f[1] for f in self.training_data]
+        fvs = [f[2].values() for f in self.training_data]
+        new_fvs = []
+        for f in fvs:
+            f = self.extractor.convert_to_values(f)
+            new_fvs.append(f)
+        fvs = new_fvs
+
+        self.action_classifier.fit(fvs, action_labels)
+        self.dep_classifier.fit(fvs, dep_labels)
+    def ___knn(self, fv_state):
         min_distances = []
         for j in range(0, len(self.training_data)):
             f = self.training_data[j]
@@ -248,10 +308,22 @@ class ParseClassifier:
         return (chosen_action, chosen_dep)
 
     def __svm(self, fv_state):
+        state_values = self.extractor.convert_to_values(fv_state.values())
+        pred_action = self.action_classifier.predict(state_values)[0]
+        pred_dep = self.dep_classifier.predict(state_values)[0]
 
-        pred_action = self.action_classifier.predict(fv_state.values())[0]
-        pred_dep = self.dep_classifier.predict(fv_state.values())[0]
+        return (pred_action, pred_dep)
 
+    def __decision_tree(self, fv_state):
+        state_values = self.extractor.convert_to_values(fv_state.values())
+        pred_action = self.action_classifier.predict(state_values)[0]
+        pred_dep = self.dep_classifier.predict(state_values)[0]
+        return (pred_action, pred_dep)
+
+    def __sklearn_knn(self, fv_state):
+        state_values = self.extractor.convert_to_values(fv_state.values())
+        pred_action = self.action_classifier.predict(state_values)[0]
+        pred_dep = self.dep_classifier.predict(state_values)[0]
         return (pred_action, pred_dep)
 
 class Parser:
@@ -439,7 +511,7 @@ class Parser:
         self.S.append(self.I[0])
         self.I = self.I[1:]
 
-    def predict_actions(self, sentence, properties, classifier, mode="knn"):
+    def predict_actions(self, sentence, properties, classifier):
         # print "extracting"
         features = []
         modified_features = []
@@ -452,7 +524,8 @@ class Parser:
         while len(self.I) > 0:
             state = self.get_current_state(properties)
             lex_state = [self.mappings[f] if f in self.mappings.keys() else f for f in state]
-            (action, dep) = classifier.get_next_action(lex_state, mode=mode)
+            (action, dep) = classifier.get_next_action(lex_state)
+            # print "predicted action %s dep %s" % (str(action), str(dep))
             if (action==actions["LA"] or action==actions["RA"]) and len(self.S) == 0:
                 action = actions["S"]
             features.append((action, dep, state))
@@ -471,6 +544,8 @@ class Parser:
                 set_property(properties, self.I[0], "dep", dep)
 
                 self.right_arc(stack_top, dep)
+            elif action == actions["END"]:
+                break
 
         state = self.get_current_state(properties)
         features.append(("END", 'NULL', state))
@@ -613,7 +688,6 @@ def get_dependencies_from_properties(real_properties):
     return test_dependencies
 
 def predict(filepath, model_path=None, print_status=False, k=1, classifier=None, mode="knn"):
-    # print("[Testing]")
     parser = Parser()
     if classifier==None:
         classifier = ParseClassifier(k, mode=mode)
@@ -637,10 +711,10 @@ def predict(filepath, model_path=None, print_status=False, k=1, classifier=None,
             parser.reset()
             num += 1
             tested_sentences.append(" ".join(sentence))
-            sent_pred = parser.predict_actions(sentence, properties, classifier, mode=mode)
+            sent_pred = parser.predict_actions(sentence, properties, classifier)
             predictions[num - 1] = sent_pred
             real_properties[num - 1] = test_properties
-            if print_status:
+            if print_status and num%5==0:
                 print "%d:\t%s" % (num, sentence)
 
             properties = defaultdict(list)
@@ -671,10 +745,11 @@ def predict(filepath, model_path=None, print_status=False, k=1, classifier=None,
     return (predictions, real_dependencies)
 
 def incremental_train(filepath, mode, k=1, folds=5):
-    for i in range(10, 11, 10):
-        cross_validate(filepath, i, mode, k)
-
-
+    for i in range(1, 2, 10):
+        i = 1.5
+        (dep_accuracy, arc_accuracy) = cross_validate(filepath, i, mode, k, folds)
+        print "%d%%\t%2.3f\t%2.3f" \
+              % (i, dep_accuracy, arc_accuracy)
 
 def cross_validate(filepath, i, mode, k=1, folds=5):
     parser = DataParser()
@@ -682,15 +757,21 @@ def cross_validate(filepath, i, mode, k=1, folds=5):
     train_file = '../training_data.txt'
     test_file = '../test_data.txt'
     train_fvs = '../training.dat'
-    dep_f1 = 0
-    arc_f1 = 0
+    dep_total = 0.0
+    arc_total = 0.0
     for j in range(0, folds):
-        parser.random_split(train_file, test_file, 1.0/i)
-
+        (num_train, num_test) = parser.random_split(train_file, test_file, i/100.0)
         classifier = train(train_file, train_fvs, model=mode)
+        if k<0:
+            k = max(int(num_train/2) - 1, 1)
+
         (predictions, real_dependencies) = predict(test_file, k=k, classifier=classifier, mode=mode)
         (dep_accuracy, arc_accuracy) = get_raw_accuracy(predictions, real_dependencies)
-        print("Training set size: %d%% \tk: %d\tArc accuracy: %2.3f\tLabel accuracy: %2.3f" % (i, k, arc_accuracy, dep_accuracy))
+        dep_total += dep_accuracy
+        arc_total += arc_accuracy
+
+    return (dep_total/folds, arc_total/folds)
+
 
 def single_experiment(filepath):
 
@@ -705,4 +786,8 @@ def single_experiment(filepath):
 # predict('../welt-annotation-spatial.txt', start=11, max=1 print_status=True, k=4)
 
 # single_experiment('../welt-annotation-spatial.txt')
-# incremental_train('../welt-annotation-spatial.txt', "knn", 1)
+incremental_train('../welt-annotation-spatial.txt', "decision_tree", k=5, folds=10)
+# incremental_train('../welt-annotation-spatial.txt', "knn", k=1, folds=5)
+# incremental_train('../welt-annotation-spatial.txt', "knn", k=5, folds=5)
+# incremental_train('../welt-annotation-spatial.txt', "knn", k=-1, folds=5)
+# incremental_train('../welt-annotation-spatial.txt', "decision_tree", k=5, folds=10)
