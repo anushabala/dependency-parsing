@@ -745,8 +745,7 @@ def predict(filepath, model_path=None, print_status=False, k=1, classifier=None,
     return (predictions, real_dependencies)
 
 def incremental_train(filepath, mode, k=1, folds=5):
-    for i in range(1, 2, 10):
-        i = 1.5
+    for i in range(10, 91, 10):
         (dep_accuracy, arc_accuracy) = cross_validate(filepath, i, mode, k, folds)
         print "%d%%\t%2.3f\t%2.3f" \
               % (i, dep_accuracy, arc_accuracy)
@@ -782,12 +781,5 @@ def single_experiment(filepath):
     print accuracy
 
 
-# new_design('../welt-annotation-spatial.txt')
 # predict('../welt-annotation-spatial.txt', start=11, max=1 print_status=True, k=4)
-
-# single_experiment('../welt-annotation-spatial.txt')
-incremental_train('../welt-annotation-spatial.txt', "decision_tree", k=5, folds=10)
-# incremental_train('../welt-annotation-spatial.txt', "knn", k=1, folds=5)
-# incremental_train('../welt-annotation-spatial.txt', "knn", k=5, folds=5)
-# incremental_train('../welt-annotation-spatial.txt', "knn", k=-1, folds=5)
 # incremental_train('../welt-annotation-spatial.txt', "decision_tree", k=5, folds=10)
