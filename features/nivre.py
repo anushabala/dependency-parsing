@@ -1,9 +1,16 @@
 #Written by: Anusha Balakrishnan
 #Date: 11/21/14
-from features.convert_dependencies import get_property, actions, set_property
+from features.data_tools import get_property, set_property
+from enum import Enum
 
+class ParserActions(Enum):
+    S = 1
+    LA = 2
+    RA = 3
+    END = 4
 
 class Parser:
+
     def __init__(self, k=1):
         self.S = []
         self.I = []
@@ -144,7 +151,7 @@ class Parser:
             state = self.get_current_state(properties)
 
             if len(self.S) == 0:
-                features.append(("S", 'NULL', state))
+                features.append((ParserActions.S, 'NULL', state))
                 self.shift()
 
             else:
@@ -152,22 +159,22 @@ class Parser:
                 stack_head = get_property(properties, stack_top, "head")
                 input_head = get_property(properties, self.I[0], "head")
                 if stack_head == self.I[0]:
-
                     dep = get_property(properties, stack_top, "dep")
-                    features.append(("LA", dep, state))
+                    features.append((ParserActions.LA, dep, state))
                     self.left_arc(stack_head, dep, stack_top)
+
                 elif input_head == stack_top:
                     dep = get_property(properties, self.I[0], "dep")
-                    features.append(("RA", dep, state))
+                    features.append((ParserActions.RA, dep, state))
                     self.right_arc(input_head, dep)
 
                 else:
-                    features.append(("S", 'NULL', state))
+                    features.append((ParserActions.S, 'NULL', state))
                     self.shift()
 
         #final state
         state = self.get_current_state(properties)
-        features.append(("END", 'NULL', state))
+        features.append((ParserActions.END, 'NULL', state))
 
         for (state, dep, feat) in features:
             feat = [self.mappings[f] if f in self.mappings.keys() else f for f in feat]
@@ -203,29 +210,29 @@ class Parser:
             lex_state = [self.mappings[f] if f in self.mappings.keys() else f for f in state]
             (action, dep) = classifier.get_next_action(lex_state)
             # print "predicted action %s dep %s" % (str(action), str(dep))
-            if (action==actions["LA"] or action==actions["RA"]) and len(self.S) == 0:
-                action = actions["S"]
+            if (action == ParserActions.LA or action == ParserActions.RA) and len(self.S) == 0:
+                action = ParserActions.S
             features.append((action, dep, state))
-            if action == actions["S"]:
+            if action == ParserActions.S:
                 self.shift()
 
-            elif action == actions["LA"]:
+            elif action == ParserActions.LA:
                 stack_top = self.S[-1]
                 set_property(properties, stack_top, "head", self.I[0])
                 set_property(properties, stack_top, "dep", dep)
                 self.left_arc(self.I[0], dep, stack_top)
 
-            elif action == actions["RA"]:
+            elif action == ParserActions.RA:
                 stack_top = self.S[-1]
                 set_property(properties, self.I[0], "head", stack_top)
                 set_property(properties, self.I[0], "dep", dep)
 
                 self.right_arc(stack_top, dep)
-            elif action == actions["END"]:
+            elif action == ParserActions.END:
                 break
 
         state = self.get_current_state(properties)
-        features.append(("END", 'NULL', state))
+        features.append((ParserActions.END, 'NULL', state))
 
         for (action, dep, state) in features:
             state = [self.mappings[f] if f in self.mappings.keys() else f for f in state]

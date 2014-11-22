@@ -3,6 +3,7 @@
 from random import randint
 
 
+columns = {"index": 0, "word": 1, "stem": 2, "morph": 3, "pos": 4, "head": 5, "dep": 6}
 class DataParser:
     def __init__(self):
         self.all_data = []
@@ -108,7 +109,22 @@ class DataParser:
             for line in sentence:
                 test_file.write(line+"\n")
             test_file.write("\n")
+
         train_file.close()
         test_file.close()
 
         return (len(train_data), len(test_data))
+
+
+def get_property(properties, pos, propName):
+    relevant_props = properties[pos]
+    if relevant_props[columns[propName] - 1] == '':
+        return "0"
+    if propName == "head":
+        return int(relevant_props[columns[propName] - 1])
+    return relevant_props[columns[propName] - 1]
+
+
+def set_property(properties, pos, propName, new_value):
+    relevant_props = properties[pos]
+    relevant_props[columns[propName] - 1] = new_value

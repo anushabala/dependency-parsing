@@ -10,6 +10,8 @@ from enum import Enum
 
 
 
+columns = {"index": 0, "word": 1, "stem": 2, "morph": 3, "pos": 4, "head": 5, "dep": 6}
+
 # Use Weka - try different classification algs for the dependency labels, for parser action
 # start using differeent method when you have more training data?
 #
@@ -20,12 +22,12 @@ from enum import Enum
 from sklearn.svm import SVC
 from sklearn import tree
 from sklearn.neighbors import KNeighborsClassifier
-from features.data_tools import DataParser
+from features.data_tools import DataParser, get_property
 from features.feature_extraction import FeatureExtractor
-from features.nivre_parser import Parser
+from features.nivre import Parser
 
 
-columns = {"index": 0, "word": 1, "stem": 2, "morph": 3, "pos": 4, "head": 5, "dep": 6}
+
 actions = {"S": 1, "LA": 2, "RA": 3, "END": 4}
 training_fvs = []
 
@@ -35,19 +37,6 @@ class Classifier(Enum):
     linear_svm = 2
     rbf_svm = 3
     decision_tree = 4
-
-
-def get_property(properties, pos, propName):
-    relevant_props = properties[pos]
-    if relevant_props[columns[propName] - 1] == '':
-        return "0"
-    if propName == "head":
-        return int(relevant_props[columns[propName] - 1])
-    return relevant_props[columns[propName] - 1]
-
-def set_property(properties, pos, propName, new_value):
-    relevant_props = properties[pos]
-    relevant_props[columns[propName] - 1] = new_value
 
 
 class ParseClassifier:
@@ -251,6 +240,7 @@ def train(filepath, train_file, print_status=False, model=Classifier.knn):
                 print "%d:\t%s" % (num, sentence)
             properties = {}
             first = True
+            break
         elif first:
             line = line.split()
             line = [w.strip() for w in line]
@@ -263,6 +253,10 @@ def train(filepath, train_file, print_status=False, model=Classifier.knn):
             properties[pos] = line[columns["index"] + 1:]
         line = infile.readline()
     infile.close()
+
+    for sent_features in training_data:
+        for f in sent_features:
+            print f
 
     classifier.train(training_data)
     training_fvs = classifier.get_training_data()
@@ -422,29 +416,33 @@ def cross_validate(filepath, num_train, mode, test_file, k=1, folds=5):
 
 
 def single_experiment(filepath):
+    parser = DataParser()
+    parser.load_data(filepath)
+    train_file = '../all_training_data.txt'
+    test_file = '../test_data.txt'
+    parser.initial_split(train_file, test_file)
+    classifier = train(train_file, '../training.dat', model=Classifier.decision_tree)
+    # (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', '../training.dat', classifier=classifier)
+    #
+    # accuracy = get_raw_accuracy(predictions, real_dependencies)
+    # print accuracy
 
-    classifier = train('../welt-annotation-spatial.txt', '../training.dat')
-    (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', '../training.dat', classifier=classifier)
-
-    accuracy = get_raw_accuracy(predictions, real_dependencies)
-    print accuracy
-
-
+single_experiment('../welt-annotation-spatial.txt')
 # predict('../welt-annotation-spatial.txt', start=11, max=1 print_status=True, k=4)
-print "KNN (k=1)"
-incremental_train('../welt-annotation-spatial.txt', Classifier.knn, k=1, folds=10)
-print "---------------------------- "
-print "KNN (k=5)"
-incremental_train('../welt-annotation-spatial.txt', Classifier.knn, k=5, folds=10)
-print "---------------------------- "
-print "KNN (k= n/2)"
-incremental_train('../welt-annotation-spatial.txt', Classifier.knn, k=-1, folds=10)
-print "---------------------------- "
-print "LINEAR SVM"
-incremental_train('../welt-annotation-spatial.txt', Classifier.linear_svm, k=-1, folds=10)
-print "---------------------------- "
-print "RBF SVM"
-incremental_train('../welt-annotation-spatial.txt', Classifier.rbf_svm, k=-1, folds=10)
-print "---------------------------- "
-print "DECISION TREE"
-incremental_train('../welt-annotation-spatial.txt', Classifier.decision_tree, k=-1, folds=10)
+# print "KNN (k=1)"
+# incremental_train('../welt-annotation-spatial.txt', Classifier.knn, k=1, folds=10)
+# print "---------------------------- "
+# print "KNN (k=5)"
+# incremental_train('../welt-annotation-spatial.txt', Classifier.knn, k=5, folds=10)
+# print "---------------------------- "
+# print "KNN (k= n/2)"
+# incremental_train('../welt-annotation-spatial.txt', Classifier.knn, k=-1, folds=10)
+# print "---------------------------- "
+# print "LINEAR SVM"
+# incremental_train('../welt-annotation-spatial.txt', Classifier.linear_svm, k=-1, folds=10)
+# print "---------------------------- "
+# print "RBF SVM"
+# incremental_train('../welt-annotation-spatial.txt', Classifier.rbf_svm, k=-1, folds=10)
+# print "---------------------------- "
+# print "DECISION TREE"
+# incremental_train('../welt-annotation-spatial.txt', Classifier.decision_tree, k=-1, folds=10)

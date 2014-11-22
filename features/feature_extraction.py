@@ -2,7 +2,6 @@
 #Date: 11/21/14
 from collections import defaultdict
 import pickle
-from features.convert_dependencies import actions
 
 
 class FeatureExtractor:
@@ -37,8 +36,8 @@ class FeatureExtractor:
     def convert_to_fvs(self, all_features):
         training_fvs = []
         for sent_features in all_features:
-            for (action_name, dep, state) in sent_features:
-                action_num = actions[action_name]
+            for (action, dep, state) in sent_features:
+                action_num = action.value
                 dep_num = self.FV_MAPPINGS[self.LABEL].index(dep)
                 vectors = self.convert_instance_to_fv(state)
                 training_fvs.append((action_num, dep_num, vectors))
