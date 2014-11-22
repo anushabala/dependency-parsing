@@ -189,7 +189,7 @@ The bottle lies in the basket
 4	the 	the 		D	5	DET
 5	basket	basket		N	3	OBJ
 						
-The cassave is on the stump
+The cassava is on the stump
 0	the 	the 		D	1	DET
 1	cassava 	cassava 		N	2	SUBJ-XCOMP-S
 2	is 	be	3SG.PRS	Vcop	0	ROOT
@@ -320,7 +320,7 @@ The bottle is on the table
 4	the 	the 		D	5	DET
 5	table	table		N	3	OBJ
 
-The stick os stuck into the stump
+The stick is stuck into the stump
 0	the 	the 		D	1	DET
 1	stick 	stick 		N	3	SUBJ
 2	is 	be	3SG.PRS	AUX	3	AUX
@@ -463,7 +463,7 @@ The ball is in the tree
 4	the 	the 		D	5	DET
 5	tree 	tree 		N	3	OBJ
 						
-The cassaves are on the stump
+The cassavas are on the stump
 0	The 	The 		D	1	DET
 1	cassavas 	cassava 	PL	N	2	SUBJ-XCOMP-S
 2	are 	be	3PL.PRS	Vcop	0	ROOT
