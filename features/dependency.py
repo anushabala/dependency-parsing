@@ -25,6 +25,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from features.data_tools import DataParser, get_property
 from features.feature_extraction import FeatureExtractor
 from features.nivre import Parser
+from features.nivre import ParserActions
 
 
 
@@ -118,15 +119,14 @@ class ParseClassifier:
         fv_state = self.extractor.convert_instance_to_fv(state)
         if self.type == Classifier.linear_svm or self.type == Classifier.rbf_svm:
             (chosen_action, chosen_dep) = self.__svm(fv_state)
-            return (chosen_action, self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
         elif self.type == Classifier.decision_tree:
             (chosen_action, chosen_dep) = self.__decision_tree(fv_state)
-            return (chosen_action, self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
-        elif self.type == Classifier.knn:
-            (chosen_action, chosen_dep) = self.__sklearn_knn(fv_state)
-            return (chosen_action, self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
         elif self.type == Classifier.baseline:
             (chosen_action, chosen_dep) = self.__baseline(fv_state)
+        else:
+            (chosen_action, chosen_dep) = self.__sklearn_knn(fv_state)
+
+        return (ParserActions(chosen_action), self.extractor.FV_MAPPINGS[self.extractor.LABEL][chosen_dep])
 
     def __train_decision_tree(self):
         self.action_classifier = tree.DecisionTreeClassifier()
@@ -213,6 +213,11 @@ class ParseClassifier:
         pred_dep = self.dep_classifier.predict(state_values)[0]
         return (pred_action, pred_dep)
 
+    def __baseline(self, fv_state):
+        chosen_action = ParserActions.LA.value
+        chosen_dep = self.extractor.get_index(self.extractor.LABEL, self.baseline_dep)
+        return (chosen_action, chosen_dep)
+
 
 def train(filepath, train_file, print_status=False, model=Classifier.knn):
     # print("[Training]")
@@ -240,7 +245,6 @@ def train(filepath, train_file, print_status=False, model=Classifier.knn):
                 print "%d:\t%s" % (num, sentence)
             properties = {}
             first = True
-            break
         elif first:
             line = line.split()
             line = [w.strip() for w in line]
@@ -253,10 +257,6 @@ def train(filepath, train_file, print_status=False, model=Classifier.knn):
             properties[pos] = line[columns["index"] + 1:]
         line = infile.readline()
     infile.close()
-
-    for sent_features in training_data:
-        for f in sent_features:
-            print f
 
     classifier.train(training_data)
     training_fvs = classifier.get_training_data()
@@ -285,31 +285,6 @@ def get_raw_accuracy(predictions, test_dependencies):
     dep_accuracy = correct_dep / total
     arc_accuracy = correct_arc/total
     return (dep_accuracy, arc_accuracy)
-
-def get_f1(predictions, test_dependencies):
-    pass
-
-def get_precision(predictions, test_dependencies):
-    true_arc = 0.0
-    labeled_arc = 0.0
-    true_dep = 0.0
-    labeled_dep = 0.0
-
-    # for key in test_dependencies.keys():
-    #     for (head, label, dep) in test_dependencies[key]:
-    #         total += 1
-    #         for (pred_head, pred_label, pred_dep) in predictions[key]:
-    #             if head == pred_head and dep == pred_dep:
-    #                 correct_arc += 1
-    #                 if label == pred_label:
-    #                     correct_dep += 1
-    #
-    # dep_accuracy = correct_dep / total
-    # arc_accuracy = correct_arc/total
-    # return (dep_accuracy, arc_accuracy)
-
-def get_recall(predictions, test_dependencies):
-    pass
 
 def get_dependencies_from_properties(real_properties):
     test_dependencies = {}
@@ -375,62 +350,65 @@ def predict(filepath, model_path=None, print_status=False, k=1, classifier=None,
 
         line = infile.readline()
 
+    # print tested_sentences
     infile.close()
     real_dependencies = get_dependencies_from_properties(real_properties)
     return (predictions, real_dependencies)
 
-def incremental_train(filepath, mode, k=1, folds=5):
+def cross_validate(filepath, mode, k=1, folds=10, range_start=10, range_end=90, incremental=True, small_dataset=False):
     parser = DataParser()
-    num_data = parser.load_data(filepath)
-    print num_data
-    train_file = '../all_training_data.txt'
-    test_file = '../test_data.txt'
-    parser.initial_split(train_file, test_file)
-    for i in range(10, 91, 10):
-        train_num = int((i/100.0) * num_data)
-        # print train_num
-        (dep_accuracy, arc_accuracy) = cross_validate(train_file, train_num, mode, test_file, k, folds)
-        print "Number of training instances: %d (%d%%)%%\t%2.3f\t%2.3f" \
-              % (train_num, i, dep_accuracy, arc_accuracy)
-
-def cross_validate(filepath, num_train, mode, test_file, k=1, folds=5):
-    parser = DataParser()
-    parser.load_data(filepath)
-    train_file = '../training_data.txt'
-    train_fvs = '../training.dat'
-    dep_total = 0.0
-    arc_total = 0.0
+    total_data = parser.load_data(filepath)
+    dep_total = defaultdict(float)
+    arc_total = defaultdict(float)
     for j in range(0, folds):
-        (num_train, num_test) = parser.choose_training_data(train_file, num_train)
-        # print "\t", num_train, num_test
-        if k<0:
-            k = max(int(num_train/2) - 1, 1)
-        classifier = train(train_file, train_fvs, model=mode)
-        (predictions, real_dependencies) = predict(test_file, k=k, classifier=classifier, mode=mode)
-        (dep_accuracy, arc_accuracy) = get_raw_accuracy(predictions, real_dependencies)
+        data_file = '../all_training_data.txt'
+        test_file = '../test_data.txt'
+        train_file = '../training_data.txt'
 
-        dep_total += dep_accuracy
-        arc_total += arc_accuracy
+        parser.initial_split(data_file, test_file)
+        splitter = DataParser()
+        splitter.load_data(data_file)
+        if small_dataset:
+            for i in [1,3,5]:
+                splitter.choose_training_data(train_file, i)
+                (dep_accuracy, arc_accuracy) = single_experiment(train_file, test_file, mode, k)
 
-    return (dep_total/folds, arc_total/folds)
+                dep_total[i] += dep_accuracy
+                arc_total[i] += arc_accuracy
+
+                if not incremental:
+                    splitter.reset_splits()
+        for i in range(range_start, range_end+1, 10):
+            train_num = int((i/100.0) * total_data)
+            splitter.choose_training_data(train_file, train_num)
+            (dep_accuracy, arc_accuracy) = single_experiment(train_file, test_file, mode, k)
+
+            dep_total[i] += dep_accuracy
+            arc_total[i] += arc_accuracy
+
+            if not incremental:
+                splitter.reset_splits()
+
+    for key in sorted(dep_total.keys()):
+
+        if key < 10:
+            train_str = "%d" % key
+        else:
+            train_str = "%d%%" % key
+        print "%2.3f\t%2.3f" \
+                  % (dep_total[key]/folds, arc_total[key]/folds)
+
+def single_experiment(train_file, test_file, mode, k=1):
+    train_fvs = '../training.dat'
+    classifier = train(train_file, train_fvs, model=mode)
+    (predictions, real_dependencies) = predict(test_file, k=k, classifier=classifier, mode=mode)
+    accuracy = get_raw_accuracy(predictions, real_dependencies)
+    return accuracy
 
 
-def single_experiment(filepath):
-    parser = DataParser()
-    parser.load_data(filepath)
-    train_file = '../all_training_data.txt'
-    test_file = '../test_data.txt'
-    parser.initial_split(train_file, test_file)
-    classifier = train(train_file, '../training.dat', model=Classifier.decision_tree)
-    # (predictions, real_dependencies) = predict('../welt-annotation-spatial.txt', '../training.dat', classifier=classifier)
-    #
-    # accuracy = get_raw_accuracy(predictions, real_dependencies)
-    # print accuracy
-
-single_experiment('../welt-annotation-spatial.txt')
-# predict('../welt-annotation-spatial.txt', start=11, max=1 print_status=True, k=4)
+# single_experiment('../welt-annotation-spatial.txt')
 # print "KNN (k=1)"
-# incremental_train('../welt-annotation-spatial.txt', Classifier.knn, k=1, folds=10)
+cross_validate('../welt-annotation-spatial.txt', Classifier.baseline, k=1, folds=1, small_dataset=False, range_start=10, range_end=10)
 # print "---------------------------- "
 # print "KNN (k=5)"
 # incremental_train('../welt-annotation-spatial.txt', Classifier.knn, k=5, folds=10)
