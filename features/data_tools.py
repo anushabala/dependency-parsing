@@ -7,6 +7,9 @@ columns = {"index": 0, "word": 1, "stem": 2, "morph": 3, "pos": 4, "head": 5, "d
 class DataParser:
     def __init__(self):
         self.all_data = []
+        self.training_data = []
+        self.test_data = []
+        self.selected = 0
     def write_fvs(self, fvs, filepath):
         out_file = open(filepath, 'w')
         for (action, dep, vectors) in fvs:
@@ -50,39 +53,39 @@ class DataParser:
         return len(self.all_data)
 
     def choose_training_data(self, train_file, train_num, validation_data=None, is_ratio=True):
-        selected = 0
-        train_data = []
-        test_data = []
-        while selected<train_num and selected<len(self.all_data):
-            pos = randint(selected, len(self.all_data)-1)
-            train_data.append(self.all_data[pos])
-            self.all_data[pos], self.all_data[selected] = self.all_data[selected], self.all_data[pos]
-            selected += 1
 
-        while selected<len(self.all_data):
-            test_data.append(self.all_data[selected])
-            selected+=1
+        while self.selected<train_num and self.selected<len(self.all_data):
+            pos = randint(self.selected, len(self.all_data)-1)
+            self.training_data.append(self.all_data[pos])
+            self.all_data[pos], self.all_data[self.selected] = self.all_data[self.selected], self.all_data[pos]
+            self.selected += 1
+
+        if validation_data!=None:
+            while self.selected<len(self.all_data):
+                self.test_data.append(self.all_data[self.selected])
+                self.selected+=1
 
         train_file = open(train_file, 'w')
-        for sentence in train_data:
+        for sentence in self.training_data:
             for line in sentence:
                 train_file.write(line+"\n")
+
             train_file.write("\n")
         train_file.close()
 
         if validation_data!=None:
             validation_data = open(validation_data, 'w')
-            for sentence in test_data:
+            for sentence in self.test_data:
                 for line in sentence:
                     validation_data.write(line+"\n")
                 validation_data.write("\n")
             validation_data.close()
 
-
-
-        return (len(train_data), len(test_data))
+        # print self.training_data
+        return (len(self.training_data), len(self.test_data))
 
     def initial_split(self, train_file, test_file):
+        self.reset_splits()
         train_file = open(train_file, 'w')
         test_file = open(test_file, 'w')
         ratio = 0.9
@@ -115,6 +118,10 @@ class DataParser:
 
         return (len(train_data), len(test_data))
 
+    def reset_splits(self):
+        self.training_data = []
+        self.test_data = []
+        self.selected = 0
 
 def get_property(properties, pos, propName):
     relevant_props = properties[pos]
