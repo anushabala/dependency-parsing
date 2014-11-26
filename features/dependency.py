@@ -239,7 +239,6 @@ def train(filepath, train_file, print_status=False, model=Classifier.knn):
         if line == "":
             num +=1
 
-
             parser.reset()
             sent_features = parser.get_state_sequence(sentence, properties)
             training_data.append(sent_features)
@@ -247,8 +246,6 @@ def train(filepath, train_file, print_status=False, model=Classifier.knn):
                 print "%d:\t%s" % (num, sentence)
             properties = {}
             first = True
-            if num==20:
-                break
         elif first:
             line = line.split()
             line = [w.strip() for w in line]
@@ -413,7 +410,7 @@ def single_experiment(train_file, test_file, mode, k=1):
 
 # single_experiment('../welt-annotation-spatial.txt')
 # print "KNN (k=1)"
-cross_validate('../welt-annotation-spatial.txt', Classifier.knn, k=1, folds=1, small_dataset=True, range_start=10, range_end=90)
+cross_validate('../welt-annotation-spatial.txt', Classifier.knn, k=5, folds=10, small_dataset=True, range_start=10, range_end=90)
 # print "---------------------------- "
 # print "KNN (k=5)"
 # incremental_train('../welt-annotation-spatial.txt', Classifier.knn, k=5, folds=10)
