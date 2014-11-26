@@ -4,6 +4,8 @@ from random import randint
 
 
 columns = {"index": 0, "word": 1, "stem": 2, "morph": 3, "pos": 4, "head": 5, "dep": 6}
+conll_columns = {"index": 0, "word": 1, "stem": 2, "cpos": 3, "fpos": 4, "head": 5, "feats":6, "deprel": 7, "phead": 8,
+                 "pdeprel": 9}
 class DataParser:
     def __init__(self):
         self.all_data = []
@@ -151,8 +153,6 @@ class DataParser:
 
 def get_property(properties, pos, propName):
     relevant_props = properties[pos]
-    if relevant_props[columns[propName] - 1] == '':
-        return "0"
     if propName == "head":
         return int(relevant_props[columns[propName] - 1])
     return relevant_props[columns[propName] - 1]
@@ -161,3 +161,61 @@ def get_property(properties, pos, propName):
 def set_property(properties, pos, propName, new_value):
     relevant_props = properties[pos]
     relevant_props[columns[propName] - 1] = new_value
+
+def get_sentences(filepath, print_status=True):
+
+    # print("[Training]")
+    infile = open(filepath, 'r')
+    line = infile.readline()
+    first = True
+    properties = {}
+    sentence = None
+    data = []
+    num = 0
+    max_morph_feats = 1
+
+    while line:
+        line = line.strip()
+        line = line.lower()
+        if line == "":
+            num +=1
+            data.append((sentence, properties))
+            if print_status:
+                print "%d:\t%s" % (num, sentence)
+            properties = {}
+            first = True
+
+        elif first:
+            line = line.split()
+            line = [w.strip() for w in line]
+            sentence = line
+            first = False
+
+        else:
+            line = line.split('\t')
+            line = [w.strip() for w in line]
+            line = ["NULL" if w=='' or w=='_' else w for w in line]
+            line[columns["morph"]] = line[columns["morph"]].split('|')
+            if len(line[columns["morph"]]) > max_morph_feats:
+                max_morph_feats = len(line[columns["morph"]])
+            index_pos = columns["index"]
+            pos = int(line[index_pos])
+            properties[pos] = line[index_pos + 1:]
+        line = infile.readline()
+    infile.close()
+
+    new_data = []
+    for (sentence, properties) in data:
+
+        for key in properties:
+            current_morph = get_property(properties, key, "morph")
+            new_morph = []
+            new_morph.extend(current_morph)
+            while len(new_morph)<max_morph_feats:
+                new_morph.append("NULL")
+            set_property(properties, key, "morph", new_morph)
+
+        new_data.append((sentence, properties))
+
+    data = new_data
+    return data, max_morph_feats

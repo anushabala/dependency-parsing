@@ -22,7 +22,7 @@ columns = {"index": 0, "word": 1, "stem": 2, "morph": 3, "pos": 4, "head": 5, "d
 from sklearn.svm import SVC
 from sklearn import tree
 from sklearn.neighbors import KNeighborsClassifier
-from features.data_tools import DataParser, get_property
+from features.data_tools import DataParser, get_property, get_sentences
 from features.feature_extraction import FeatureExtractor
 from features.nivre import Parser
 from features.nivre import ParserActions
@@ -219,50 +219,45 @@ class ParseClassifier:
         return (chosen_action, chosen_dep)
 
 
-def train(filepath, train_file, print_status=False, model=Classifier.knn):
+def train(filepath, train_file, print_status=False, model=Classifier.knn, k=1):
     # print("[Training]")
-    global FV_MAPPINGS
-    FV_MAPPINGS = defaultdict(lambda: ["NULL"])
     training_data = []
-    parser = Parser()
-    classifier = ParseClassifier(mode=model)
-    infile = open(filepath, 'r')
-    line = infile.readline()
-    first = True
-    properties = {}
-    sentence = None
-    num = 0
+    data, max_features = get_sentences(filepath, print_status)
+    parser = Parser(max_features)
+    classifier = ParseClassifier(mode=model, k=k)
+    for (sentence, properties) in data:
+        sent_features = parser.get_state_sequence(sentence, properties)
+        training_data.append(sent_features)
+    # while line:
+    #     line = line.strip()
+    #     line = line.lower()
+    #     if line == "":
+    #         num +=1
+    #
+    #         parser.reset()
+    #         sent_features = parser.get_state_sequence(sentence, properties)
+    #         training_data.append(sent_features)
+    #         if print_status:
+    #             print "%d:\t%s" % (num, sentence)
+    #         properties = {}
+    #         first = True
+    #     elif first:
+    #         line = line.split()
+    #         line = [w.strip() for w in line]
+    #         sentence = line
+    #         first = False
+    #     else:
+    #         line = line.split('\t')
+    #         line = [w.strip() for w in line]
+    #         pos = int(line[columns["index"]])
+    #         properties[pos] = line[columns["index"] + 1:]
+    #     line = infile.readline()
+    # infile.close()
 
-    while line:
-        line = line.strip()
-        line = line.lower()
-        if line == "":
-            num +=1
-
-            parser.reset()
-            sent_features = parser.get_state_sequence(sentence, properties)
-            training_data.append(sent_features)
-            if print_status:
-                print "%d:\t%s" % (num, sentence)
-            properties = {}
-            first = True
-        elif first:
-            line = line.split()
-            line = [w.strip() for w in line]
-            sentence = line
-            first = False
-        else:
-            line = line.split('\t')
-            line = [w.strip() for w in line]
-            pos = int(line[columns["index"]])
-            properties[pos] = line[columns["index"] + 1:]
-        line = infile.readline()
-    infile.close()
-
-    classifier.train(training_data)
-    training_fvs = classifier.get_training_data()
-    writer = DataParser()
-    writer.write_fvs(training_fvs, train_file)
+    # classifier.train(training_data)
+    # training_fvs = classifier.get_training_data()
+    # writer = DataParser()
+    # writer.write_fvs(training_fvs, train_file)
 
     return classifier
     # print "Completed training"
@@ -402,7 +397,7 @@ def cross_validate(filepath, mode, k=1, folds=10, range_start=10, range_end=90, 
 
 def single_experiment(train_file, test_file, mode, k=1):
     train_fvs = '../training.dat'
-    classifier = train(train_file, train_fvs, model=mode)
+    classifier = train(train_file, train_fvs, model=mode, k=k)
     (predictions, real_dependencies) = predict(test_file, k=k, classifier=classifier, mode=mode)
     accuracy = get_raw_accuracy(predictions, real_dependencies)
     return accuracy
