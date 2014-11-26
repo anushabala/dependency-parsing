@@ -67,10 +67,12 @@ class FeatureExtractor:
         new_val = []
         for f in values:
             feature_val = 0
-            f = f[::-1]
-            for i in range(0, len(f)):
-                if f[i]=='1':
-                    feature_val+= 2**i
+            if '1' in f:
+                feature_val = f.index('1') + 1
+            # f = f[::-1]
+            # for i in range(0, len(f)):
+            #     if f[i]=='1':
+            #         feature_val+= 2**i
             new_val.append(feature_val)
         return new_val
 
