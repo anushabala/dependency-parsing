@@ -408,21 +408,4 @@ def single_experiment(train_file, test_file, mode, k=1):
     return accuracy
 
 
-# single_experiment('../welt-annotation-spatial.txt')
-# print "KNN (k=1)"
-cross_validate('../welt-annotation-spatial.txt', Classifier.knn, k=5, folds=10, small_dataset=True, range_start=10, range_end=90)
-# print "---------------------------- "
-# print "KNN (k=5)"
-# incremental_train('../welt-annotation-spatial.txt', Classifier.knn, k=5, folds=10)
-# print "---------------------------- "
-# print "KNN (k= n/2)"
-# incremental_train('../welt-annotation-spatial.txt', Classifier.knn, k=-1, folds=10)
-# print "---------------------------- "
-# print "LINEAR SVM"
-# incremental_train('../welt-annotation-spatial.txt', Classifier.linear_svm, k=-1, folds=10)
-# print "---------------------------- "
-# print "RBF SVM"
-# incremental_train('../welt-annotation-spatial.txt', Classifier.rbf_svm, k=-1, folds=10)
-# print "---------------------------- "
-# print "DECISION TREE"
-# incremental_train('../welt-annotation-spatial.txt', Classifier.decision_tree, k=-1, folds=10)
+
