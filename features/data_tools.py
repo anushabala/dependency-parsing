@@ -118,6 +118,32 @@ class DataParser:
 
         return (len(train_data), len(test_data))
 
+    def fold_split(self, train_file, test_file, fold, total_folds=10):
+        self.reset_splits()
+        train_file = open(train_file, 'w')
+        test_file = open(test_file, 'w')
+        ratio = total_folds/100.0
+        test_num = int(ratio * len(self.all_data))
+        fold_start = int((fold-1)*(len(self.all_data)*ratio))
+        fold_end = fold_start+test_num
+        test_data = self.all_data[fold_start:fold_end]
+        train_data = self.all_data[0:fold_start]
+        train_data.extend(self.all_data[fold_end:])
+
+        for sentence in train_data:
+            for line in sentence:
+                train_file.write(line+"\n")
+            train_file.write("\n")
+        for sentence in test_data:
+            for line in sentence:
+                test_file.write(line+"\n")
+            test_file.write("\n")
+
+        train_file.close()
+        test_file.close()
+
+        return (len(train_data), len(test_data))
+
     def reset_splits(self):
         self.training_data = []
         self.test_data = []

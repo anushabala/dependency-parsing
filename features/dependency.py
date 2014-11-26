@@ -238,6 +238,8 @@ def train(filepath, train_file, print_status=False, model=Classifier.knn):
         line = line.lower()
         if line == "":
             num +=1
+
+
             parser.reset()
             sent_features = parser.get_state_sequence(sentence, properties)
             training_data.append(sent_features)
@@ -245,6 +247,8 @@ def train(filepath, train_file, print_status=False, model=Classifier.knn):
                 print "%d:\t%s" % (num, sentence)
             properties = {}
             first = True
+            if num==20:
+                break
         elif first:
             line = line.split()
             line = [w.strip() for w in line]
@@ -365,7 +369,8 @@ def cross_validate(filepath, mode, k=1, folds=10, range_start=10, range_end=90, 
         test_file = '../test_data.txt'
         train_file = '../training_data.txt'
 
-        parser.initial_split(data_file, test_file)
+        parser.fold_split(data_file, test_file, j+1)
+
         splitter = DataParser()
         splitter.load_data(data_file)
         if small_dataset:
@@ -395,8 +400,8 @@ def cross_validate(filepath, mode, k=1, folds=10, range_start=10, range_end=90, 
             train_str = "%d" % key
         else:
             train_str = "%d%%" % key
-        print "%2.3f\t%2.3f" \
-                  % (dep_total[key]/folds, arc_total[key]/folds)
+        print "%s\t%2.3f\t%2.3f" \
+                  % (train_str, dep_total[key]/folds, arc_total[key]/folds)
 
 def single_experiment(train_file, test_file, mode, k=1):
     train_fvs = '../training.dat'
@@ -408,7 +413,7 @@ def single_experiment(train_file, test_file, mode, k=1):
 
 # single_experiment('../welt-annotation-spatial.txt')
 # print "KNN (k=1)"
-cross_validate('../welt-annotation-spatial.txt', Classifier.baseline, k=1, folds=1, small_dataset=False, range_start=10, range_end=10)
+cross_validate('../welt-annotation-spatial.txt', Classifier.knn, k=1, folds=1, small_dataset=True, range_start=10, range_end=90)
 # print "---------------------------- "
 # print "KNN (k=5)"
 # incremental_train('../welt-annotation-spatial.txt', Classifier.knn, k=5, folds=10)
