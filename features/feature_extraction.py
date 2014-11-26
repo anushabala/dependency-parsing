@@ -21,14 +21,23 @@ class FeatureExtractor:
                 if i not in self.FV_MAPPINGS.keys():
                     self.FV_MAPPINGS[i] = ["NULL"]
                 if state[i] not in self.FV_MAPPINGS[i]:
-                    self.FV_MAPPINGS[i].append(state[i])
+                    if isinstance(state[i], list):
+                        for val in state[i]:
+                            self.FV_MAPPINGS[i].append(val)
+                    else:
+                        self.FV_MAPPINGS[i].append(state[i])
 
     def convert_instance_to_fv(self, state):
         vectors = defaultdict(str)
         for i in range(0, len(state)):
             v = ["0"] * len(self.FV_MAPPINGS[i])
-            if state[i] in self.FV_MAPPINGS[i]:
-                v[self.FV_MAPPINGS[i].index(state[i])] = "1"
+            if isinstance(state[i], list):
+                for val in state[i]:
+                    if val in self.FV_MAPPINGS[i]:
+                        v[self.FV_MAPPINGS[i].index(val)] = "1"
+            else:
+                if state[i] in self.FV_MAPPINGS[i]:
+                    v[self.FV_MAPPINGS[i].index(state[i])] = "1"
             v = "".join(v)
             vectors[i] = v
         return vectors
@@ -57,11 +66,12 @@ class FeatureExtractor:
     def convert_to_values(self, values):
         new_val = []
         for f in values:
-            pos = 0
-            if '1' in f:
-                pos = f.index('1') + 1
-            new_val.append(pos)
-
+            feature_val = 0
+            f = f[::-1]
+            for i in range(0, len(f)):
+                if f[i]=='1':
+                    feature_val+= 2**i
+            new_val.append(feature_val)
         return new_val
 
     def get_index(self, feature_index, feature_val):
