@@ -115,8 +115,7 @@ class Parser:
             top_word = get_property(properties, top, "stem")
             features.append(top_word)
             morphology = get_property(properties, top, "morph")
-            for unit in morphology:
-                features.append(unit)
+            features.extend(morphology)
             top_head = "NULL"
             for (head, label, dep) in self.A:
                 if dep == top:
