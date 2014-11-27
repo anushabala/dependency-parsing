@@ -220,49 +220,21 @@ class ParseClassifier:
         return (chosen_action, chosen_dep)
 
 
-def train(filepath, train_file, print_status=False, model=Classifier.knn, k=1):
+def train(raw_data, max_features, fv_file, print_status=False, model=Classifier.knn, k=1):
     # print("[Training]")
     training_data = []
-    data, max_features = get_sentences(filepath, print_status)
     parser = Parser(max_features)
     classifier = ParseClassifier(mode=model, k=k)
-    for (sentence, properties) in data:
+    for (sentence, properties) in raw_data:
         sent_features = parser.get_state_sequence(sentence, properties)
         training_data.append(sent_features)
-    # while line:
-    #     line = line.strip()
-    #     line = line.lower()
-    #     if line == "":
-    #         num +=1
-    #
-    #         parser.reset()
-    #         sent_features = parser.get_state_sequence(sentence, properties)
-    #         training_data.append(sent_features)
-    #         if print_status:
-    #             print "%d:\t%s" % (num, sentence)
-    #         properties = {}
-    #         first = True
-    #     elif first:
-    #         line = line.split()
-    #         line = [w.strip() for w in line]
-    #         sentence = line
-    #         first = False
-    #     else:
-    #         line = line.split('\t')
-    #         line = [w.strip() for w in line]
-    #         pos = int(line[columns["index"]])
-    #         properties[pos] = line[columns["index"] + 1:]
-    #     line = infile.readline()
-    # infile.close()
 
     classifier.train(training_data)
     training_fvs = classifier.get_training_data()
     writer = DataParser()
-    writer.write_fvs(training_fvs, train_file)
+    writer.write_fvs(training_fvs, fv_file)
 
     return classifier, max_features
-    # print "Completed training"
-
 
 def get_raw_accuracy(predictions, test_dependencies):
     num = 0
@@ -295,55 +267,13 @@ def get_dependencies_from_properties(real_properties):
         test_dependencies[key] = all_deps
     return test_dependencies
 
-def predict(filepath, max_features, model_path=None, print_status=False, k=1, classifier=None, mode=Classifier.knn):
+def predict(train_data, max_features, classifier, print_status=False):
     parser = Parser(max_morph_features=max_features)
-    if classifier==None:
-        classifier = ParseClassifier(k, mode=mode)
-        classifier.load_model(model_path)
     num = 0
     real_properties = {}
     predictions = {}
-    # while line:
-    #     line = line.strip()
-    #     line = line.lower()
-    #     if line == "":
-    #
-    #         parser.reset()
-    #         num += 1
-    #         tested_sentences.append(" ".join(sentence))
-    #         sent_pred = parser.predict_actions(sentence, properties, classifier)
-    #         predictions[num - 1] = sent_pred
-    #         real_properties[num - 1] = test_properties
-    #         if print_status and num%5==0:
-    #             print "%d:\t%s" % (num, sentence)
-    #
-    #         properties = defaultdict(list)
-    #         test_properties = defaultdict(list)
-    #         first = True
-    #
-    #     elif first:
-    #
-    #         line = line.split()
-    #         line = [w.strip() for w in line]
-    #         sentence = line
-    #         first = False
-    #     else:
-    #         line = line.split('\t')
-    #         line = [w.strip() for w in line]
-    #         pos = int(line[columns["index"]])
-    #         properties[pos] = line[columns["index"] + 1:]
-    #         properties[pos][-1] = 'NULL'
-    #         properties[pos][-2] = 'NULL'
-    #
-    #         test_properties[pos] = line[columns["index"] + 1:]
-    #
-    #     line = infile.readline()
-    #
-    # # print tested_sentences
-    # infile.close()
-    data, max_feats = get_sentences(filepath, print_status)
-    for (sentence, actual_properties) in data:
 
+    for (sentence, actual_properties) in train_data:
         num += 1
         test_properties = {}
         for key in actual_properties:
@@ -402,9 +332,11 @@ def cross_validate(filepath, mode, k=1, folds=10, range_start=10, range_end=90, 
                   % (train_str, dep_total[key]/folds, arc_total[key]/folds)
 
 def single_experiment(train_file, test_file, mode, k=1):
-    train_fvs = '../training.dat'
-    classifier, max_features = train(train_file, train_fvs, model=mode, k=k)
-    (predictions, real_dependencies) = predict(test_file, max_features, k=k, classifier=classifier, mode=mode)
+    fv_file = '../training.dat'
+    train_data, max_features = get_sentences(train_file)
+    classifier, max_features = train(train_data, max_features, fv_file, model=mode, k=k)
+    test_data, max_test_features = get_sentences(test_file)
+    (predictions, real_dependencies) = predict(test_data, max_features, classifier)
     accuracy = get_raw_accuracy(predictions, real_dependencies)
     return accuracy
 

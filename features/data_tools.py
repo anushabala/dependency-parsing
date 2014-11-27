@@ -162,7 +162,7 @@ def set_property(properties, pos, propName, new_value):
     relevant_props = properties[pos]
     relevant_props[columns[propName] - 1] = new_value
 
-def get_sentences(filepath, print_status=True):
+def get_sentences(filepath, print_status=False):
 
     # print("[Training]")
     infile = open(filepath, 'r')
