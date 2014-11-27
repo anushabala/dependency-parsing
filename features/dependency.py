@@ -1,6 +1,7 @@
 # Written by: Anusha Balakrishnan
 # Date: 10/6/14
 from collections import defaultdict
+import copy
 from heapq import heappush, nsmallest
 import math
 import operator
@@ -254,12 +255,12 @@ def train(filepath, train_file, print_status=False, model=Classifier.knn, k=1):
     #     line = infile.readline()
     # infile.close()
 
-    # classifier.train(training_data)
-    # training_fvs = classifier.get_training_data()
-    # writer = DataParser()
-    # writer.write_fvs(training_fvs, train_file)
+    classifier.train(training_data)
+    training_fvs = classifier.get_training_data()
+    writer = DataParser()
+    writer.write_fvs(training_fvs, train_file)
 
-    return classifier
+    return classifier, max_features
     # print "Completed training"
 
 
@@ -294,60 +295,65 @@ def get_dependencies_from_properties(real_properties):
         test_dependencies[key] = all_deps
     return test_dependencies
 
-def predict(filepath, model_path=None, print_status=False, k=1, classifier=None, mode=Classifier.knn):
-    parser = Parser()
+def predict(filepath, max_features, model_path=None, print_status=False, k=1, classifier=None, mode=Classifier.knn):
+    parser = Parser(max_morph_features=max_features)
     if classifier==None:
         classifier = ParseClassifier(k, mode=mode)
         classifier.load_model(model_path)
-
-    infile = open(filepath, 'r')
-    line = infile.readline()
-    first = True
-    properties = defaultdict(list)
-    test_properties = defaultdict(list)
-    tested_sentences = []
-    sentence = None
     num = 0
     real_properties = {}
     predictions = {}
-    while line:
-        line = line.strip()
-        line = line.lower()
-        if line == "":
+    # while line:
+    #     line = line.strip()
+    #     line = line.lower()
+    #     if line == "":
+    #
+    #         parser.reset()
+    #         num += 1
+    #         tested_sentences.append(" ".join(sentence))
+    #         sent_pred = parser.predict_actions(sentence, properties, classifier)
+    #         predictions[num - 1] = sent_pred
+    #         real_properties[num - 1] = test_properties
+    #         if print_status and num%5==0:
+    #             print "%d:\t%s" % (num, sentence)
+    #
+    #         properties = defaultdict(list)
+    #         test_properties = defaultdict(list)
+    #         first = True
+    #
+    #     elif first:
+    #
+    #         line = line.split()
+    #         line = [w.strip() for w in line]
+    #         sentence = line
+    #         first = False
+    #     else:
+    #         line = line.split('\t')
+    #         line = [w.strip() for w in line]
+    #         pos = int(line[columns["index"]])
+    #         properties[pos] = line[columns["index"] + 1:]
+    #         properties[pos][-1] = 'NULL'
+    #         properties[pos][-2] = 'NULL'
+    #
+    #         test_properties[pos] = line[columns["index"] + 1:]
+    #
+    #     line = infile.readline()
+    #
+    # # print tested_sentences
+    # infile.close()
+    data, max_feats = get_sentences(filepath, print_status)
+    for (sentence, actual_properties) in data:
 
-            parser.reset()
-            num += 1
-            tested_sentences.append(" ".join(sentence))
-            sent_pred = parser.predict_actions(sentence, properties, classifier)
-            predictions[num - 1] = sent_pred
-            real_properties[num - 1] = test_properties
-            if print_status and num%5==0:
-                print "%d:\t%s" % (num, sentence)
+        num += 1
+        test_properties = {}
+        for key in actual_properties:
+            test_properties[key] = copy.deepcopy(actual_properties[key])
+            test_properties[key][-1] = 'NULL'
+            test_properties[key][-2] = 'NULL'
+        sent_pred = parser.predict_actions(sentence, test_properties, classifier)
+        predictions[num-1] = sent_pred
+        real_properties[num-1] = actual_properties
 
-            properties = defaultdict(list)
-            test_properties = defaultdict(list)
-            first = True
-
-        elif first:
-
-            line = line.split()
-            line = [w.strip() for w in line]
-            sentence = line
-            first = False
-        else:
-            line = line.split('\t')
-            line = [w.strip() for w in line]
-            pos = int(line[columns["index"]])
-            properties[pos] = line[columns["index"] + 1:]
-            properties[pos][-1] = 'NULL'
-            properties[pos][-2] = 'NULL'
-
-            test_properties[pos] = line[columns["index"] + 1:]
-
-        line = infile.readline()
-
-    # print tested_sentences
-    infile.close()
     real_dependencies = get_dependencies_from_properties(real_properties)
     return (predictions, real_dependencies)
 
@@ -397,8 +403,8 @@ def cross_validate(filepath, mode, k=1, folds=10, range_start=10, range_end=90, 
 
 def single_experiment(train_file, test_file, mode, k=1):
     train_fvs = '../training.dat'
-    classifier = train(train_file, train_fvs, model=mode, k=k)
-    (predictions, real_dependencies) = predict(test_file, k=k, classifier=classifier, mode=mode)
+    classifier, max_features = train(train_file, train_fvs, model=mode, k=k)
+    (predictions, real_dependencies) = predict(test_file, max_features, k=k, classifier=classifier, mode=mode)
     accuracy = get_raw_accuracy(predictions, real_dependencies)
     return accuracy
 

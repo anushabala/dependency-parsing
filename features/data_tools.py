@@ -180,6 +180,7 @@ def get_sentences(filepath, print_status=True):
         if line == "":
             num +=1
             data.append((sentence, properties))
+
             if print_status:
                 print "%d:\t%s" % (num, sentence)
             properties = {}
