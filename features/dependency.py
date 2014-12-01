@@ -58,6 +58,9 @@ class ParseClassifier:
     def train(self, data):
         self.add_fv_mappings(data)
         training_fvs = self.extractor.convert_to_fvs(data)
+        # print self.extractor.FV_MAPPINGS
+        # for fv in training_fvs[:10]:
+        #     print fv
         self.training_data = training_fvs
         if self.type== Classifier.linear_svm:
             self.__train_svm('linear')
@@ -220,10 +223,10 @@ class ParseClassifier:
         return (chosen_action, chosen_dep)
 
 
-def train(raw_data, max_features, fv_file, print_status=False, model=Classifier.knn, k=1):
+def train(raw_data, morph_features, fv_file, print_status=False, model=Classifier.knn, k=1):
     # print("[Training]")
     training_data = []
-    parser = Parser(max_features)
+    parser = Parser(morph_features)
     classifier = ParseClassifier(mode=model, k=k)
     for (sentence, properties) in raw_data:
         sent_features = parser.get_state_sequence(sentence, properties)
@@ -234,7 +237,7 @@ def train(raw_data, max_features, fv_file, print_status=False, model=Classifier.
     writer = DataParser()
     writer.write_fvs(training_fvs, fv_file)
 
-    return classifier, max_features
+    return classifier, morph_features
 
 def get_raw_accuracy(predictions, test_dependencies):
     num = 0
@@ -267,8 +270,8 @@ def get_dependencies_from_properties(real_properties):
         test_dependencies[key] = all_deps
     return test_dependencies
 
-def predict(train_data, max_features, classifier, print_status=False):
-    parser = Parser(max_morph_features=max_features)
+def predict(train_data, morph_features, classifier, print_status=False):
+    parser = Parser(morph_features=morph_features)
     num = 0
     real_properties = {}
     predictions = {}

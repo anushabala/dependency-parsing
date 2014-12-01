@@ -11,12 +11,12 @@ class ParserActions(Enum):
 
 class Parser:
 
-    def __init__(self, max_morph_features, k=1):
+    def __init__(self, morph_features, k=1):
         self.S = []
         self.I = []
         self.A = []  # the list of dependents on any given token
         self.mappings = {}
-        self.max_morph_features = max_morph_features
+        self.morph_features = morph_features
 
 
 
@@ -25,47 +25,36 @@ class Parser:
         # Feature 1: POS:stack(1), morph:stack(1)
         if len(self.S) > 1:
             features.append(get_property(properties, self.S[-2], "pos"))
-            # features.append(get_property(properties, self.S[-2], "morph"))
         else:
             features.append("NULL")
-            # features.append("NULL")
 
         # POS:stack(0)
         if len(self.S) > 0:
             features.append(get_property(properties, self.S[-1], "pos"))
-            # features.append(get_property(properties, self.S[-1], "morph"))
         else:
             features.append("NULL")
-            # features.append("NULL")
 
         # POS: input(0)
         if len(self.I) > 0:
             features.append(get_property(properties, self.I[0], "pos"))
-            # features.append(get_property(properties, self.I[0], "morph"))
         else:
             features.append("NULL")
-            # features.append("NULL")
         # POS: input(1)
         if len(self.I) > 1:
             features.append(get_property(properties, self.I[1], "pos"))
-            # features.append(get_property(properties, self.I[1], "morph"))
         else:
             features.append("NULL")
-            # features.append("NULL")
         # POS: input(2)
         if len(self.I) > 2:
             features.append(get_property(properties, self.I[2], "pos"))
-            # features.append(get_property(properties, self.I[2], "morph"))
         else:
             features.append("NULL")
             # features.append("NULL")
         # POS: input(3)
         if len(self.I) > 3:
             features.append(get_property(properties, self.I[3], "pos"))
-            # features.append(get_property(properties, self.I[3], "morph"))
         else:
             features.append("NULL")
-            # features.append("NULL")
 
         if len(self.S) > 0:
             top_pos = self.S[-1]
@@ -115,7 +104,11 @@ class Parser:
             top_word = get_property(properties, top, "stem")
             features.append(top_word)
             morphology = get_property(properties, top, "morph")
-            features.extend(morphology)
+            for f in self.morph_features:
+                if f in morphology:
+                    features.append(f)
+                else:
+                    features.append("_")
             top_head = "NULL"
             for (head, label, dep) in self.A:
                 if dep == top:
@@ -126,7 +119,7 @@ class Parser:
 
         else:
             features.append("NULL")
-            for i in range(0, self.max_morph_features):
+            for i in range(0, len(self.morph_features)):
                 features.append("NULL")
             features.append("NULL")
 
@@ -134,21 +127,27 @@ class Parser:
         if len(self.I) > 0:
             features.append(get_property(properties, self.I[0], "stem"))
             morphology = get_property(properties, self.I[0], "morph")
-            for unit in morphology:
-                features.append(unit)
+            for f in self.morph_features:
+                if f in morphology:
+                    features.append(f)
+                else:
+                    features.append("_")
         else:
             features.append("NULL")
-            for i in range(0, self.max_morph_features):
+            for i in range(0, len(self.morph_features)):
                 features.append("NULL")
         #next input word
         if len(self.I) > 1:
             features.append(get_property(properties, self.I[1], "stem"))
             morphology = get_property(properties, self.I[1], "morph")
-            for unit in morphology:
-                features.append(unit)
+            for f in self.morph_features:
+                if f in morphology:
+                    features.append(f)
+                else:
+                    features.append("_")
         else:
             features.append("NULL")
-            for i in range(0, self.max_morph_features):
+            for i in range(0, len(self.morph_features)):
                 features.append("NULL")
 
         return features

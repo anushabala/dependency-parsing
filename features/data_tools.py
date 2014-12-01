@@ -173,7 +173,7 @@ def get_sentences(filepath, print_status=False):
     sentence = None
     data = []
     num = 0
-    max_morph_feats = 1
+    morph_feats = set()
 
     while line:
         line = line.strip()
@@ -198,8 +198,9 @@ def get_sentences(filepath, print_status=False):
             line = [w.strip() for w in line]
             line = ["NULL" if w=='' or w=='_' else w for w in line]
             line[columns["morph"]] = line[columns["morph"]].split('|')
-            if len(line[columns["morph"]]) > max_morph_feats:
-                max_morph_feats = len(line[columns["morph"]])
+            for feat in line[columns["morph"]]:
+                if feat!='NULL':
+                    morph_feats.add(feat)
             index_pos = columns["index"]
             pos = int(line[index_pos])
             properties[pos] = line[index_pos + 1:]
@@ -212,15 +213,20 @@ def get_sentences(filepath, print_status=False):
         for key in properties:
             current_morph = get_property(properties, key, "morph")
             new_morph = []
-            new_morph.extend(current_morph)
-            while len(new_morph)<max_morph_feats:
-                new_morph.append("NULL")
+            for f in morph_feats:
+                if f in current_morph:
+                    new_morph.append(f)
+                else:
+                    new_morph.append("_")
             set_property(properties, key, "morph", new_morph)
+
 
         new_data.append((sentence, properties))
 
     data = new_data
-    return data, max_morph_feats
+    # print data
+    # print morph_feats
+    return data, morph_feats
 
 #todo: "_" is also NULL including ""
 
@@ -244,4 +250,5 @@ def add_word_roots(filepath, out_file, lang="english"):
     infile.close()
     out_file.close()
 
-add_word_roots('../universal_dependencies/de/de-universal-train.conll', '../universal_dependencies/de/de-fixed.conll')
+# add_word_roots('../universal_dependencies/de/de-universal-train.conll', '../universal_dependencies/de/de-fixed.conll')
+get_sentences('../test_data.txt')
