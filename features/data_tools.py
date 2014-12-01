@@ -199,6 +199,8 @@ def get_sentences(filepath, print_status=False):
             line = ["NULL" if w=='' or w=='_' else w for w in line]
             line[columns["morph"]] = line[columns["morph"]].split('|')
             for feat in line[columns["morph"]]:
+                if "=" in feat:
+                    feat = feat.split("=")[-1]
                 if feat!='NULL':
                     morph_feats.add(feat)
             index_pos = columns["index"]
@@ -228,7 +230,6 @@ def get_sentences(filepath, print_status=False):
     # print morph_feats
     return data, morph_feats
 
-#todo: "_" is also NULL including ""
 
 def add_word_roots(filepath, out_file, lang="english"):
     infile = open(filepath, 'r')
