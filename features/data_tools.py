@@ -1,6 +1,7 @@
 #Written by: Anusha Balakrishnan
 #Date: 11/21/14
 from random import randint
+from nltk.stem import snowball
 
 
 columns = {"index": 0, "word": 1, "stem": 2, "morph": 3, "pos": 4, "head": 5, "dep": 6}
@@ -220,3 +221,27 @@ def get_sentences(filepath, print_status=False):
 
     data = new_data
     return data, max_morph_feats
+
+#todo: "_" is also NULL including ""
+
+def add_word_roots(filepath, out_file, lang="english"):
+    infile = open(filepath, 'r')
+    out_file = open(out_file, 'w')
+    stemmer = snowball.GermanStemmer()
+    stem_pos = 2
+    for line in infile.readlines():
+        line = line.strip()
+        if len(line)!=0:
+            line = line.split('\t')
+            form = line[1]
+            # todo: make unicode
+            line[stem_pos] = stemmer.stem(form)
+            line = "\t".join(line)
+            out_file.write(line+"\n")
+        else:
+            out_file.write("\n")
+
+    infile.close()
+    out_file.close()
+
+add_word_roots('../universal_dependencies/de/de-universal-train.conll', '../universal_dependencies/de/de-fixed.conll')
