@@ -1,0 +1,1328 @@
+0	the 	the 		det	1	det
+1	stick	stick		noun	3	nsubj
+2	is	be	3sg.prs	aux	3	aux
+3	leaning 	lean	prog	verb	-1	root
+4	against 	against 		adp	3	adpmod
+5	the	the		det	6	det
+6	tree	tree		noun	4	adpobj
+
+0	the	the		det	1	det
+1	cloth 	cloth 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	draped 	drape	pass	verb	-1	root
+4	over 	over 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	basket	basket		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	rope 	rope 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	wrapped 	wrap	pass	verb	-1	root
+4	over 	over 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	rock	rock		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	cloth 	cloth 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table	table		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cassavas 	cassava 	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	basket	basket		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	stick 	stick 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table	table		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	ball 	ball 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	ground	ground		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	balls 	ball 	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table	table		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	sticks 	stick	pl	noun	3	nsubj
+2	are 	be	3pl.prs	verb	3	auxpass
+3	stuck 	stuck 		adj	-1	root
+4	in 	in 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	ground	ground		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	bottle 	bottle 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	rock	rock		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	beans 	bean	pl	noun	3	nsubj
+2	are 	be	3pl.prs	aux	3	auxpass
+3	scattered 	scattered 	pass	verb	-1	root
+4	on 	on 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	ground	ground		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	pot 	pot 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	face	face 		noun	4	nmod
+4	down 	down 		adv	2	xcomp-pred
+5	on 	on 		adp	4	adpmod
+6	the 	the 		det	7	det
+7	stump	stump		noun	5	adpobj
+
+0	the 	the 		det	1	det
+1	stick 	stick 		noun	2	nsubj
+2	leans 	lean	3sg.prs	verb	-1	root
+3	against 	against 		adp	2	adpmod
+4	the 	the 		det	5	det
+5	basket	basket		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cloth 	cloth 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	aux
+3	spread 	spread 		verb	-1	root
+4	out 	out 		adv	3	advmod
+5	on 	on 		adp	3	adpmod
+6	the 	the 		det	7	det
+7	table	table		noun	5	adpobj
+
+0	the 	the 		det	1	det
+1	rope 	rope 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	wrapped 	wrap 	pass	verb	-1	root
+4	around 	around 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	rock	rock		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	cloth 	cloth 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	draped 	drape	pass	verb	-1	root
+4	over 	over 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	basket	basket		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	stick 	stick 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table	table		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	balls 	ball	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table	table		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	rope 	rope 		noun	2	nsubj
+2	lies 	lie	3sg.prs	verb	-1	root
+3	over 	over 		adp	2	adpmod
+4	the 	the 		det	5	det
+5	opening 	opening 		noun	3	adpobj
+6	of 	of 		adp	5	adpmod
+7	the 	the 		det	8	det
+8	basket	basket		noun	6	adpobj
+
+0	the 	the 		det	1	det
+1	stick 	stick 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	planted 	plant 	pass	verb	-1	root
+4	in 	in 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	ground	ground		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	ball 	ball 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table	table		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	bottle 	bottle 		noun	2	nsubj
+2	lies 	lie	3sg.prs	verb	-1	root
+3	in 	in 		adp	2	adpmod
+4	the 	the 		det	5	det
+5	basket	basket		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cassava 	cassava 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	stump	stump		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cloth 	cloth 		noun	2	nsubj
+2	lies 	lie	3sg.prs	verb	-1	root
+3	across 	across 		adp	2	adpmod
+4	the 	the 		det	5	det
+5	opening 	opening 		noun	3	adpobj
+6	of 	of 		adp	5	adpmod
+7	the 	the 		det	8	det
+8	basket	basket		noun	6	adpobj
+
+0	the 	the 		det	1	det
+1	beans 	bean	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table	table		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	bottle 	bottle 		noun	2	nsubj
+2	lies 	lie	3sg.prs	verb	-1	root
+3	horizontally 	horizontally 		adv	2	advmod
+4	on 	on 		adp	2	adpmod
+5	the 	the 		det	6	det
+6	rock	rock		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	rope 	rope 		noun	2	nsubj
+2	hangs 	hang	3sg.prs	verb	-1	root
+3	out 	out 		adv	2	advmod
+4	of 	of 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	basket	basket		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	bottles 	bottle 	pl	noun	3	nsubj
+2	are 	be	3pl.prs	aux	3	auxpass
+3	stuck 	stick 	pass	verb	-1	root
+4	into 	into 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	ground	ground		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	pot 	pot 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	perched 	perch	pass	verb	-1	root
+4	on 	on 		adp	3	adpmod
+5	a 	a 		det	6	det
+6	branch	branch		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	tablecloth 	tablecloth 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	over 	over 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table	table		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	stick 	stick 		noun	2	nsubj
+2	leans 	lean	3sg.prs	verb	-1	root
+3	against 	against 		adp	2	adpmod
+4	the 	the 		det	5	det
+5	stump	stump		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cloth 	cloth 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	draped 	drape	pass	verb	-1	root
+4	over 	over 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	rock	rock		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	rope 	rope 		noun	2	nsubj
+2	hangs 	hang	3sg.prs	verb	-1	root
+3	over 	over 		adp	2	adpmod
+4	the 	the 		det	5	det
+5	branch	branch		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cloth 	cloth 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	resting 	rest	prog	verb	-1	root
+4	on 	on 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	stump	stump		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	stick 	stick 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	balanced 	balance 	pass	verb	-1	root
+4	on 	on 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	rock	rock		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	rope 	rope 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	tied 	tie	pass	verb	-1	root
+4	around 	around 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	stump	stump		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	bottle 	bottle 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table	table		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	stick 	stick 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	stuck 	stick 	pass	verb	-1	root
+4	into 	into 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	stump	stump		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	balls 	ball	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	ground	ground		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	stick 	stick 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	leaning 	lean 	prog	verb	-1	root
+4	against 	against 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	tree 	tree 		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	cloth 	cloth 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	draped 	drape 	pass	verb	-1	root
+4	over 	over 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	side 	side 		noun	4	adpobj
+7	of 	of 		adp	6	adpmod
+8	the 	the 		det	9	det
+9	basket 	basket 		noun	7	adpobj
+
+0	the 	the 		det	1	det
+1	rope 	rope 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	across 	across 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	rock 	rock 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cloth 	cloth 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table 	table 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cassavas 	cassava 	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	basket 	basket 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	stick 	stick 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table 	table 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	ball 	ball 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	ground 	ground 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	balls 	ball	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table 	table 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	sticks 	stick	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	ground 	ground 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	bottle 	bottle 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	rock 	rock 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	pot 	pot 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	aux
+3	lying 	lie	prog	verb	-1	root
+4	against 	against 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	stump 	stump 		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	rope 	rope 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	across 	across 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table	table		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cassavas 	cassava 	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	ground 	ground 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	ball 	ball 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	tree 	tree 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	rope 	rope 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	draped 	drape 	pass	verb	-1	root
+4	over 	over 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	stump 	stump 		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	bottles 	bottle	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	table 	table 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cassavas 	cassava 	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	stump 	stump 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	pot 	pot 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	wedged 	wedge 	pass	verb	-1	root
+4	in 	in 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	tree 	tree 		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	cloth 	cloth 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	aux
+3	hanging 	hang 	prog	verb	-1	root
+4	off 	off 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	table 	table 		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	ball 	ball 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	rock 	rock 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cassavas 	cassava	pl	noun	3	nsubj
+2	are 	be	3pl.prs	aux	3	auxpass
+3	piled 	pile	pass	verb	-1	root
+4	on 	on 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	ground 	ground 		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	bottles 	bottle	pl	noun	3	nsubj
+2	are 	be	3pl.prs	aux	3	aux
+3	lying 	lie 	prog	verb	-1	root
+4	on 	on 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	table 	table 		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	cassavas 	cassava	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	basket 	basket 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	rope 	rope 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	on 	on 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	stump 	stump 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	stick 	stick 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	against 	against 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	tree 	tree 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	balls 	ball 	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	basket 	basket 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	rope 	rope 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	slung 	sling 	pass	verb	-1	root
+4	in 	in 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	tree 	tree 		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	bottle 	bottle 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	ground 	ground 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cloth 	cloth 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	tree 	tree 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	bottles 	bottle 	pl	noun	2	nsubj-xcomp-s
+2	are 	be	3pl.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	basket 	basket 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	stick 	stick 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	aux
+3	lying 	lie 	prog	verb	-1	root
+4	on 	on 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	stump 	stump 		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	bottle 	bottle 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	basket 	basket 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	rope 	rope 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	draped 	drape 	pass	verb	-1	root
+4	over 	over 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	basket 	basket 		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	cloth 	cloth 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	tree 	tree 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cassavas 	cassava	pl	noun	3	nsubj
+2	are 	be	3pl.prs	aux	3	aux
+3	leaning 	lean 	prog	verb	-1	root
+4	against 	against 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	stump 	stump 		noun	4	adpobj
+
+0	the 	the 		det	1	det
+1	stick 	stick 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	tree 	tree 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	bottle 	bottle 		noun	2	nsubj-xcomp-s
+2	is 	be	3sg.prs	verb	-1	root
+3	in 	in 		adp	2	xcomp-pred
+4	the 	the 		det	5	det
+5	basket 	basket 		noun	3	adpobj
+
+0	the 	the 		det	1	det
+1	cloth 	cloth 		noun	3	nsubj
+2	is 	be	3sg.prs	aux	3	auxpass
+3	draped 	drape 	pass	verb	-1	root
+4	against 	against 		adp	3	adpmod
+5	the 	the 		det	6	det
+6	stump 	stump 		noun	4	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	5	det
+5	cube	cube		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	on	on		adp	2	adpmod
+4	top	top		noun	3	adpobj
+5	of	of		adp	4	adpmod
+6	the	the		det	7	det
+7	table	table		noun	5	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	away	away		adv	2	advmod
+4	from	from		adp	3	adpmod
+5	the	the		det	6	det
+6	cube	cube		noun	4	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	away	away		adv	2	advmod
+4	from	from		adp	3	adpmod
+5	the	the		det	6	det
+6	cube	cube		noun	4	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	forward	forward		adv	2	advmod
+4	on	on		adp	2	adpmod
+5	the	the		det	6	det
+6	table	table		noun	4	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	grazes	graze	3sg.prs	verb	-1	root
+3	the	the		det	4	det
+4	cylinder	cylinder		noun	2	dobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	from	from		adp	2	adpmod
+4	the	the		det	5	det
+5	cube	cube		noun	3	adpobj
+6	past	past		adp	2	adpmod
+7	the	the		det	8	det
+8	cylinder	cylinder		noun	6	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	to	to		adp	2	adpmod
+4	the	the		det	5	det
+5	column	column		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	towards	towards		adp	2	adpmod
+4	the	the		det	5	det
+5	cube	cube		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	from	from		adp	2	adpmod
+4	the	the		det	5	det
+5	column	column		noun	3	adpobj
+6	to	to		adp	2	adpmod
+7	the	the		det	8	det
+8	corner	corner		noun	6	adpobj
+9	of	of		adp	8	adpmod
+10	the	the		det	11	det
+11	cube	cube		noun	9	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	past	past		adp	2	adpmod
+4	the	the		det	5	det
+5	column	column		noun	3	adpobj
+6	to	to		adp	2	adpmod
+7	the	the		det	8	det
+8	corner	corner		noun	6	adpobj
+9	of	of		adp	8	adpmod
+10	the	the		det	11	det
+11	cube	cube		noun	9	adbobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	across	across		adp	2	adpmod
+4	the	the		det	5	det
+5	lawn	lawn		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	towards	towards		adp	2	adpmod
+4	me	me		pron	3	adpobj
+5	from	from		adp	2	adpmod
+6	the	the		det	7	det
+7	cube	cube		noun	5	adpobj
+8	to	to		adp	2	adpmod
+9	the	the		det	10	det
+10	column	column		noun	8	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	diagonally	diagonally		adv	2	advmod
+4	from	from		adp	3	adpmod
+5	the	the		det	6	det
+6	cube	cube		noun	4	adpobj
+7	to	to		adp	2	adpmod
+8	the	the		det	9	det
+9	column	column		noun	7	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	diagonally	diagonally		adv	2	advmod
+4	away	away		adv	2	advmod
+5	from	from		adp	4	adpmod
+6	the	the		det	7	det
+7	cube	cube		noun	5	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	5	det
+5	ring	ring		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	out	out		adv	2	advmod
+4	of	of		adp	3	adpmod
+5	the	the		det	6	det
+6	ring	ring		noun	4	adpobj
+
+0	the	the		det	1	det
+1	ring	ring		noun	2	nsubj
+2	slides	slide	3sg.prs	verb	-1	root
+3	onto	onto		adp	2	adpmod
+4	the	the		det	5	det
+5	ball	ball		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ring	ring		noun	2	nsubj
+2	slides	slide	3sg.prs	verb	-1	root
+3	off	off		adv	2	advmod
+4	of	of		adp	3	adpmod
+5	the	the		det	6	det
+6	ball	ball		noun	4	adpobj
+
+0	the	the		det	1	det
+1	ring	ring		noun	2	nsubj
+2	surrounds	surround	3sg.prs	verb	-1	root
+3	the	the		det	4	det
+4	ball	ball		noun	2	dobj
+5	from	from		adp	2	adpmod
+6	the	the		det	7	det
+7	right	right		noun	5	adpobj
+
+0	the	the		det	1	det
+1	ring	ring		noun	2	nsubj
+2	surrounds	surround	3sg.prs	verb	-1	root
+3	the	the		det	4	det
+4	ball	ball		noun	2	dobj
+5	from	from		adp	2	adpmod
+6	the	the		det	7	det
+7	left	left		noun	5	adpobj
+
+0	the	the		det	1	det
+1	ring	ring		noun	2	nsubj
+2	releases	release	3sg.prs	verb	-1	root
+3	the	the		det	4	det
+4	ball	ball		noun	2	dobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	teleports	teleport	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	6	det
+5	inner	inner		adj	6	amod
+6	ring	ring		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	teleports	teleport	3sg.prs		-1	root
+3	out	out		adv	2	advmod
+4	of	of		adp	3	adpmod
+5	the	the		det	7	det
+6	inner	inner		adj	7	amod
+7	ring	ring		noun	4	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	6	det
+5	two	two		adj	6	amod
+6	rings	ring	pl	noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	6	det
+5	inner	inner		adj	6	amod
+6	ring	ring		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	exits	exit	3sg.prs	verb	-1	root
+3	the	the		det	5	det
+4	inner	inner		adj	5	amod
+5	ring	ring		noun	2	dobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	5	det
+5	circle	circle		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	out	out		adv	2	advmod
+4	of	of		adp	3	adpmod
+5	the	the		det	6	det
+6	circle	circle		noun	4	adpobj
+
+0	the	the		det	1	det
+1	circle	circle		noun	2	nsubj
+2	moves	move	3sg.prs	verb	-1	root
+3	to	to		to-comp	2	aux
+4	surround	surround		verb	3	xcomp
+5	the	the		det	6	det
+6	ball	ball		noun	4	dobj
+
+0	the	the		det	1	det
+1	circle	circle		noun	2	nsubj
+2	moves	move	3sg.prs	verb	-1	root
+3	away	away		adv	2	advmod
+4	from	from		adp	3	adpmod
+5	surrounding	surround	ptcp.prs	verb	4	adpcomp
+6	the	the		det	7	det
+7	ball	ball		noun	5	dobj
+
+0	the	the		det	1	det
+1	cylinder	cylinder		noun	2	nsubj
+2	moves	move	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	5	det
+5	circle	circle		noun	3	adpobj
+
+0	the	the		det	1	det
+1	circle	circle		noun	2	nsubj
+2	moves	move	3sg.prs	verb	-1	root
+3	to	to		to-comp	2	aux
+4	surround	surround		verb	3	xcomp
+5	the	the		det	6	det
+6	cylinder	cylinder		noun	4	dobj
+
+0	the	the		det	1	det
+1	cylinder	cylinder		noun	2	nsubj
+2	moves	move	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	5	det
+5	tunnel	tunnel		noun	3	adpobj
+
+0	the	the		det	1	det
+1	tunnel	tunnel		noun	2	nsubj
+2	moves	move	3sg.prs	verb	-1	root
+3	to	to		to-comp	2	aux
+4	cover	cover		verb	3	xcomp
+5	the	the		det	6	det
+6	cylinder	cylinder		noun	4	dobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	5	det
+5	area	area		noun	3	adpobj
+6	bounded	bound	ptcp.pst	verb	5	partmod
+7	by	by		adp	6	adpmod
+8	five	five		adj	9	amod
+9	columns	column	pl	noun	7	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	out	out		adv	2	advmod
+4	of	of		adp	3	adpmod
+5	the	the		det	6	det
+6	area	area		noun	4	adpobj
+7	bounded	bound	ptcp.pst	verb	6	partmod
+8	by	by		adp	7	adpmod
+9	five	five		adj	10	amod
+10	columns	column	pl	noun	8	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	out	out		adv	2	advmod
+4	of	of		adp	3	adpmod
+5	the	the		det	6	det
+6	circle	circle		noun	4	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	onto	onto		adp	2	adpmod
+4	the	the		det	5	det
+5	plate	plate		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	off	off		adv	2	advmod
+4	of	of		adp	3	adpmod
+5	the	the		det	6	det
+6	plate	plate		noun	4	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	off	off		adv	2	advmod
+4	of	of		adp	3	adpmod
+5	the	the		det	6	det
+6	plate	plate		noun	4	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	onto	onto		adp	2	adpmod
+4	the	the		det	5	det
+5	plate	plate		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	4	nsubj
+2	and	and		conj	3	cc
+3	plate	plate		noun	4	nsubj
+4	move	move	3pl.prs	verb	-1	root
+5	toward	toward		adp	4	adpmod
+6	each	each		adj	7	amod
+7	other	other		noun	5	adpobj
+
+0	the	the		det	1	det
+1	plate	plate		noun	2	nsubj
+2	expands	expand	3sg.prs	verb	-1	root
+3	under	under		adp	2	adpmod
+4	the	the		det	5	det
+5	ball	ball		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	teleports	teleport	3sg.prs	verb	-1	root
+3	onto	onto		adp	2	adpmod
+4	the	the		det	5	det
+5	plate	plate		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	teleports	teleport	3sg.prs	verb	-1	root
+3	at	at		adp	2	adpmod
+4	the	the		det	5	det
+5	right	right		noun	3	adpobj
+6	of	of		adp	5	adpmod
+7	the	the		det	8	det
+8	plate	plate		noun	6	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	5	det
+5	cylinder	cylinder		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	away	away		adv	2	advmod
+4	from	from		adp	3	adpmod
+5	the	the		det	6	det
+6	cylinder	cylinder		noun	4	adpobj
+
+0	the	the		det	1	det
+1	cylinder			noun	2	nsubj
+2	moves	move	3sg.prs	verb	-1	root
+3	to	to		adp	2	adpmod
+4	the	the		det	5	det
+5	ball	ball		noun	3	adpobj
+
+0	the	the		det	1	det
+1	cylinder	cylinder		noun	2	nsubj
+2	moves	move	3sg.prs	verb	-1	root
+3	away	away		adv	2	advmod
+4	from	from		adp	3	adpmod
+5	the	the		det	6	det
+6	ball	ball		noun	4	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	up	up		adp	2	adpmod
+4	the	the		det	5	det
+5	slope	slope		noun	3	adpobj
+
+0	the	the		det	1	det
+1	slope	slope		noun	2	nsubj
+2	slides	slide	3sg.prs	verb	-1	root
+3	under	under		adp	2	adpmod
+4	the	the		det	5	det
+5	ball	ball		noun	3	adpobj
+
+0	the	the		det	1	det
+1	stick	stick		noun	2	nsubj
+2	pierces	pierce	3sg.prs	verb	-1	root
+3	the	the		det	4	det
+4	ball	ball		verb	2	dobj
+
+0	the	the		det	1	det
+1	stick	stick		noun	3	nsubj
+2	is	be	3sg.prs	aux	3	aux
+3	pulled	pull	pass	verb	-1	root
+4	out	out		adv	3	advmod
+5	of	of		adp	4	adpmod
+6	the	the		det	7	det
+7	ball	ball		noun	5	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	3	nsubj
+2	is	be	3sg.prs	aux	3	aux
+3	pushed	push	pass	verb	-1	root
+4	down	down		adv	3	advmod
+5	onto	onto		adp	4	adpmod
+6	the	the		det	7	det
+7	stick	stick		noun	5	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	3	nsubj
+2	is	be	3sg.prs	aux	3	auxpass
+3	pulled	pull	pass	verb	-1	root
+4	off	off		adp	3	adpmod
+5	the	the		det	6	det
+6	stick	stick		noun	4	adpobj
+
+0	the	the		det	1	det
+1	stick	stick		noun	2	nsubj
+2	teleports	teleport	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	5	det
+5	ball	ball		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	teleports	teleport	3sg.prs	verb	-1	root
+3	onto	onto		adp	2	adpmod
+4	the	the		det	5	det
+5	stick	stick		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	bounces	bounce	3sg.prs	verb	-1	root
+3	onto	onto		adp	2	adpmod
+4	the	the		det	5	det
+5	plate	plate		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	bounces	bounce	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	5	det
+5	ring	ring		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	bounces	bounce	3sg.prs	verb	-1	root
+3	over	over		adp	2	adpmod
+4	the	the		det	5	det
+5	dyke	dyke		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	bounces	bounce	3sg.prs	verb	-1	root
+3	on	on		adp	2	adpmod
+4	the	the		det	5	det
+5	dyke	dyke		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	flies	fly	3sg.prs	verb	-1	root
+3	through	through		adp	2	adpmod
+4	the	the		det	5	det
+5	air	air		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	teleports	teleport	3sg.prs	verb	-1	root
+3	from	from		adp	2	adpmod
+4	left	left		noun	3	adpobj
+5	to	to		adp	2	adpmod
+6	right	right		noun	5	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	across	across		adp	2	adpmod
+4	the	the		det	5	det
+5	bridge	bridge		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	teleports	teleport	3sg.prs	verb	-1	root
+3	across	across		adp	2	adpmod
+4	the	the		det	5	det
+5	bridge	bridge		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	over	over		adp	2	adpmod
+4	the	the		det	5	det
+5	ridge	ridge		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	teleports	teleport	3sg.prs	verb	-1	root
+3	across	across		adp	2	adpmod
+4	the	the		det	5	det
+5	ridge	ridge		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	along	along		adp	2	adpmod
+4	the	the		det	5	det
+5	river	river		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	along	along		adp	2	adpmod
+4	the	the		det	5	det
+5	ridge	ridge		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	on	on		adp	2	adpmod
+4	the	the		det	5	det
+5	dyke	dyke		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	from	from		adp	2	adpmod
+4	the	the		det	5	det
+5	tree	tree		noun	3	adpobj
+6	around	around		adp	2	adpmod
+7	the	the		det	8	det
+8	indentation	indentation		noun	6	adpobj
+9	towards	towards		adp	2	adpmod
+10	me	me		pron	9	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	beams	beam	3sg.prs	verb	-1	root
+3	from	from		adp	2	adpmod
+4	the	the		det	5	det
+5	tree	tree		noun	3	adpobj
+6	to	to		adp	2	adpmod
+7	me	me		pron	6	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	from	from		adp	2	adpmod
+4	the	the		det	5	det
+5	tree	tree		noun	3	adpobj
+6	towards	towards		adp	2	adpmod
+7	the	the		det	8	det
+8	pond	pond		noun	6	adpobj
+9	avoids	avoid	3sg.prs	verb	2	seq-pred
+10	the	the		det	11	det
+11	pond	pond		noun	9	dobj
+12	by	by		adp	9	adpcomp
+13	veering	veer	prog	verb	12	adpmod
+14	to	to		adp	13	adpmod
+15	its	its		adj	16	poss
+16	right	right		noun	14	adpobj
+17	and	and		conj	18	cc
+18	continues	continue	3sg.prs	verb	9	seq-pred
+19	rolling	roll	prog	verb	18	ccomp
+20	towards	towards		adp	19	adpmod
+21	me	me		pron	20	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	from	from		adp	2	adpmod
+4	the	the		det	5	det
+5	tree	tree		noun	3	adpobj
+6	towards	towards		adp	2	adpmod
+7	the	the		det	8	det
+8	pond	pond		noun	6	adpobj
+9	stops	stop	3sg.prs	verb	2	seq-pred
+10	restarts	restart	3sg.prs	verb	9	seq-pred
+11	then	then		conj	12	advmod
+12	avoids	avoid	3sg.prs	verb	10	seq-pred
+13	the	the		det	14	det
+14	pond	pond		noun	12	dobj
+15	by	by		adp	12	adpmod
+16	veering	veer	prog	verb	15	adpcomp
+17	to	to		adp	16	adpmod
+18	its	its		adj	19	poss
+19	right	right		noun	17	adpobj
+20	stops	stop	3sg.prs	verb	12	seq-pred
+21	again	again		adv	20	advmod
+22	restarts	restart	3sg.prs	verb	20	seq-pred
+23	and	and		conj	24	cc
+24	continues	continue	3sg.prs	verb	22	seq-pred
+25	rolling	roll	prog	verb	24	ccomp
+26	towards	towards		adp	25	adpmod
+27	me	me		pron	26	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	up	up		adp	2	adpmod
+4	a	a		det	5	det
+5	hill	hill		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	beams	beam	3sg.prs	verb	-1	root
+3	to	to		adp	2	adpmod
+4	the	the		det	5	det
+5	top	top		noun	3	adpobj
+6	of	of		adp	5	adpmod
+7	a	a		det	8	det
+8	hill	hill		noun	6	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	up	up		adp	2	adpmod
+4	a	a		det	5	det
+5	hill	hill		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	5	det
+5	box	box		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	falls	fall	3sg.prs	verb	-1	root
+3	into	into		adp	2	adpmod
+4	the	the		det	5	det
+5	box	box		noun	3	adpobj
+
+0	the	the		det	1	det
+1	box	box		noun	2	nsubj
+2	folds	fold	3sg.prs	verb	-1	root
+3	around	around		adp	2	adpmod
+4	the	the		det	5	det
+5	ball	ball		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	up	up		adp	2	adpmod
+4	the	the		det	5	det
+5	hill	hill		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	bounces	bounce	3sg.prs	verb	-1	root
+3	onto	onto		adp	2	adpmod
+4	the	the		det	5	det
+5	hill	hill		noun	3	adpobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	falls	fall	3sg.prs	verb	-1	root
+3	onto	onto		adp	2	adpmod
+4	the	the		det	5	det
+5	hill	hill		noun	3	adpobj
+6	and	and		conj	7	cc
+7	bounces	bounce	3sg.prs	verb	2	seq-pred
+
+0	a	a		det	1	det
+1	profusion	profusion		noun	2	nsubj
+2	forms	form	3sg.prs	verb	-1	root
+3	under	under		adp	2	adpmod
+4	the	the		det	5	det
+5	ball	ball		noun	3	adpobj
+6	and	and		conj	7	cc
+7	lifts	lift	3sg.prs	verb	2	seq-pred
+8	it	it		noun	7	dobj
+
+0	the	the		det	1	det
+1	ball	ball		noun	2	nsubj
+2	rolls	roll	3sg.prs	verb	-1	root
+3	under	under		adp	2	adpmod
+4	the	the		det	6	det
+5	bed	bed		noun	6	nmod
+6	sheet	sheet		noun	3	adpobj
+
+0	the	the		det	2	det
+1	bed	bed		noun	2	nmod
+2	sheet	sheet		noun	3	nsubj
+3	descends	descend	3sg.prs	verb	-1	root
+4	onto	onto		adp	3	adpmod
+5	the	the		det	6	det
+6	ball	ball		noun	4	adpobj
+7	covering	cover	ptcp.prs	verb	3	partmod
+8	it	it		noun	7	dobj
+
+0	the	the		det	2	det
+1	bed	bed		noun	2	nmod
+2	sheet	sheet		noun	3	nsubj
+3	slides	slide	3sg.prs	verb	-1	root
+4	over	over		adp	3	adpmod
+5	the	the		det	6	det
+6	ball	ball		noun	4	adpobj
+7	covering	cover	prt	verb	3	partmod
+8	it	it		noun	7	dobj
+

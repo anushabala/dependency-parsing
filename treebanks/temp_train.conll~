@@ -1,0 +1,18 @@
+1       To      _       A       AC      case=unmarked   0       ROOT    _       _
+2       publikumsmæssige        _       A       AN      degree=pos|gender=common/neuter|number=plur|case=unmarked|def=def/indef|transcat=unmarked       1       mod     _
+       _
+3       magneter        _       N       NC      gender=common|number=plur|case=unmarked|def=indef       1       nobj    _       _
+4       ,       _       X       XP      _       1       pnct    _       _
+5       som     _       U       U       _       12      subj    _       _
+6       -       _       X       XP      _       5       pnct    _       _
+7       hver    _       P       PI      gender=common|number=sing|case=unmarked|register=unmarked       8       mod     _       _
+8       på      _       SP      SP      _       12      mod     _       _
+9       sin     _       P       PO      person=3|gender=common|number=sing|case=unmarked|possessor=sing|reflexive=yes|register=unmarked 8       nobj    _       _
+10      måde    _       N       NC      gender=common|number=sing|case=unmarked|def=indef       9       possd   _       _
+11      -       _       X       XP      _       8       pnct    _       _
+12      tegner  _       V       VA      mood=indic|tense=present|voice=active   1       rel     _       _
+13      det     _       P       PD      gender=neuter|number=sing|case=unmarked|register=unmarked       12      dobj    _       _
+14      moderne _       A       AN      degree=pos|gender=common/neuter|number=sing/plur|case=unmarked|def=def/indef|transcat=unmarked  13      mod     _       _
+15      Paris   _       N       NP      case=unmarked   13      nobj    _       _
+16      .       _       X       XP      _       1       pnct    _       _
+
