@@ -7,7 +7,8 @@ class ParserActions(Enum):
     S = 1
     LA = 2
     RA = 3
-    END = 4
+    REDUCE = 4
+    END = 5
 
 class Parser:
 
@@ -152,7 +153,7 @@ class Parser:
 
         return features
 
-    def get_state_sequence(self, sentence, properties):
+    def get_state_sequence(self, sentence, properties, gold_standard=None):
         features = []
         modified_features = []
         self.S = []
@@ -160,6 +161,7 @@ class Parser:
         positions = [(self.I[i], sentence[i]) for i in range(0, len(sentence))]
         self.mappings = dict(positions)
         self.A = []  # the list of dependents on any given token
+
         i = 0
         while len(self.I) > 0:
             state = self.get_current_state(properties)
@@ -172,19 +174,34 @@ class Parser:
                 stack_top = self.S[-1]
                 stack_head = get_property(properties, stack_top, "head")
                 input_head = get_property(properties, self.I[0], "head")
-                if stack_head == self.I[0]:
+                if stack_head == self.I[0] and not self.has_head(stack_top):
                     dep = get_property(properties, stack_top, "dep")
                     features.append((ParserActions.LA, dep, state))
                     self.left_arc(stack_head, dep, stack_top)
 
-                elif input_head == stack_top:
+
+                elif input_head == stack_top and not self.has_head(self.I[0]):
                     dep = get_property(properties, self.I[0], "dep")
                     features.append((ParserActions.RA, dep, state))
                     self.right_arc(input_head, dep)
 
+
+
                 else:
-                    features.append((ParserActions.S, 'NULL', state))
-                    self.shift()
+                    if gold_standard!=None:
+                        if self.found_all_dependents(stack_top, gold_standard) and self.has_head(stack_top):
+                            features.append((ParserActions.REDUCE, 'NULL', state))
+                            self.reduce()
+                        else:
+                            features.append((ParserActions.S, 'NULL', state))
+                            self.shift()
+                    else:
+                        if self.has_head(stack_top):
+                            features.append((ParserActions.REDUCE, 'NULL', state))
+                            self.reduce()
+                        else:
+                            features.append((ParserActions.S, 'NULL', state))
+                            self.shift()
 
         #final state
         state = self.get_current_state(properties)
@@ -193,15 +210,33 @@ class Parser:
         for (state, dep, feat) in features:
             feat = [self.mappings[f] if f in self.mappings.keys() else f for f in feat]
             modified_features.append((state, dep, feat))
-        self.A = [(self.mappings[h], l, self.mappings[d]) for (h, l, d) in self.A]
-
+        self.A = [(h, l, d) for (h, l, d) in self.A]
         return modified_features
 
+    def found_all_dependents(self, token, gold_standard):
+        total_deps = 0
+        for (head, label, dep) in gold_standard:
+            if token==head:
+                total_deps += 1
+        found_deps = 0
+        for (head, label, dep) in self.A:
+            if token==head:
+                found_deps += 1
+        return total_deps==found_deps
+    def has_head(self, token):
+        for (head, label, dep) in self.A:
+            if dep==token:
+                return True
+        return False
     def left_arc(self, head, label, dep):
         self.S.pop()
         self.A.append((head, label, dep))
     def right_arc(self, head, label):
         self.A.append((head, label, self.I[0]))
+
+        # self.S.pop()
+        # self.I[0] = head
+
         self.S.append(self.I[0])
         self.I = self.I[1:]
 
@@ -209,6 +244,8 @@ class Parser:
         self.S.append(self.I[0])
         self.I = self.I[1:]
 
+    def reduce(self):
+        self.S.pop()
     def predict_actions(self, sentence, properties, classifier):
         # print "extracting"
         features = []
@@ -218,30 +255,43 @@ class Parser:
         positions = [(self.I[i], sentence[i]) for i in range(0, len(sentence))]
         self.mappings = dict(positions)
         self.A = []  # the list of dependents on any given token
+        alternate_deps = []
         i = 0
         while len(self.I) > 0:
             state = self.get_current_state(properties)
             lex_state = [self.mappings[f] if f in self.mappings.keys() else f for f in state]
             (action, dep) = classifier.get_next_action(lex_state)
+            # todo: extra; remove these 2 lines for normal execution
+            # alt_dep = classifier.get_extra_dep(lex_state)
+
+
+            # print "Token: %s\tAction:%s\tdep:%s" % (str(self.I[0]), action, dep)
             # print "predicted action %s dep %s" % (str(action), str(dep))
-            if (action == ParserActions.LA or action == ParserActions.RA) and len(self.S) == 0:
+            if (action == ParserActions.LA or action==ParserActions.RA or action == ParserActions.REDUCE) and len(self.S) == 0:
                 action = ParserActions.S
             features.append((action, dep, state))
             if action == ParserActions.S:
                 self.shift()
+
+            elif action == ParserActions.REDUCE:
+                self.reduce()
 
             elif action == ParserActions.LA:
                 stack_top = self.S[-1]
                 set_property(properties, stack_top, "head", self.I[0])
                 set_property(properties, stack_top, "dep", dep)
                 self.left_arc(self.I[0], dep, stack_top)
+                # todo: etra
+                # alternate_deps.append(alt_dep)
 
             elif action == ParserActions.RA:
                 stack_top = self.S[-1]
                 set_property(properties, self.I[0], "head", stack_top)
                 set_property(properties, self.I[0], "dep", dep)
-
                 self.right_arc(stack_top, dep)
+                # todo: extra
+                # alternate_deps.append(alt_dep)
+
             elif action == ParserActions.END:
                 break
 
@@ -252,7 +302,16 @@ class Parser:
             state = [self.mappings[f] if f in self.mappings.keys() else f for f in state]
             modified_features.append((action, dep, state))
 
+        #todo: extra
+        # new_A = []
+        # i = 0
+        # for (head, label, dep) in self.A:
+        #     new_A.append((head, alternate_deps[i], dep))
+        #     i+=1
+        # self.A = new_A
         self.find_root(sentence)
+
+        #todo: extra
 
         return self.A
 
